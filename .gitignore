@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Env
+venv/
+.venv/
+env/
+.env
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Node (Frontend future proofing)
+node_modules/
+dist/
+build/
+.next/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Local App Data
+monorepo/backend/db_data/
+recipe_app_planning_vibe_coding_guide.md
