@@ -24,6 +24,10 @@ app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["aut
 app.include_router(users.router, prefix=f"{settings.API_V1_STR}/users", tags=["users"])
 app.include_router(recipes.router, prefix=f"{settings.API_V1_STR}/recipes", tags=["recipes"])
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to Recipe App API"}
