@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
 from ..repository.user_repository import UserRepository
 from ..domain.user import UserCreate, UserInDB, UserResponse
-from .security import get_password_hash, verify_password
-from .jwt import create_access_token, create_refresh_token
+from ..auth.security import get_password_hash, verify_password
+from ..auth.jwt import create_access_token, create_refresh_token
 
 class AuthService:
     def __init__(self, user_repo: UserRepository):
