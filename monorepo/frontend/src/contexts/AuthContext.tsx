@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, type ReactNode } from 'react';
+import { API_BASE_URL } from '../config';
 
 interface User {
     id: string;
@@ -20,6 +21,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const login = async (email: string) => {
         // Mock Login Logic
+        console.log(`Authenticating against: ${API_BASE_URL} (Mock)`);
         return new Promise<void>((resolve) => {
             setTimeout(() => {
                 setUser({
