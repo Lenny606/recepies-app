@@ -1,7 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
 from typing import Optional, List
-from ..domain.user import UserInDB, UserCreate, UserUpdate
+from domain.user import UserInDB, UserCreate, UserUpdate
 
 class UserRepository:
     def __init__(self, db: AsyncIOMotorDatabase):

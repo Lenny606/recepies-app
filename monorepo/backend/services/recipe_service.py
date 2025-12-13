@@ -1,8 +1,8 @@
 from typing import List, Optional
 from datetime import datetime
 from fastapi import HTTPException, status
-from ..repository.recipe_repository import RecipeRepository
-from ..domain.recipe import RecipeCreate, RecipeUpdate, RecipeInDB, RecipeResponse, Visibility
+from repository.recipe_repository import RecipeRepository
+from domain.recipe import RecipeCreate, RecipeUpdate, RecipeInDB, RecipeResponse, Visibility
 
 class RecipeService:
     def __init__(self, recipe_repo: RecipeRepository):

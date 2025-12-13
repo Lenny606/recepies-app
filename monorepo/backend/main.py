@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from .core.config import get_settings
-from .core.database import db
-from .api import auth, users, recipes
+from core.config import get_settings
+from core.database import db
+from api import auth, users, recipes
 
 settings = get_settings()
 

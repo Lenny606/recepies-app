@@ -1,7 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId, Regex
 from typing import Optional, List
-from ..domain.recipe import RecipeInDB, RecipeCreate, RecipeUpdate
+from domain.recipe import RecipeInDB, RecipeCreate, RecipeUpdate
 
 class RecipeRepository:
     def __init__(self, db: AsyncIOMotorDatabase):

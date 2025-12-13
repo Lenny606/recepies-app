@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, Query, status
 from typing import List, Optional
-from ..domain.recipe import RecipeCreate, RecipeUpdate, RecipeResponse, Visibility
-from ..domain.user import UserInDB
-from ..services.recipe_service import RecipeService
-from ..repository.recipe_repository import RecipeRepository
-from .deps import get_current_user, get_recipe_repo
+from domain.recipe import RecipeCreate, RecipeUpdate, RecipeResponse, Visibility
+from domain.user import UserInDB
+from services.recipe_service import RecipeService
+from repository.recipe_repository import RecipeRepository
+from api.deps import get_current_user, get_recipe_repo
 
 router = APIRouter()
 

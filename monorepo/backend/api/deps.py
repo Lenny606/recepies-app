@@ -1,11 +1,11 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from ..core.config import get_settings
-from ..core.database import get_database
-from ..repository.user_repository import UserRepository
-from ..repository.recipe_repository import RecipeRepository
-from ..domain.user import UserInDB
+from core.config import get_settings
+from core.database import get_database
+from repository.user_repository import UserRepository
+from repository.recipe_repository import RecipeRepository
+from domain.user import UserInDB
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 settings = get_settings()
