@@ -4,11 +4,15 @@ from services.auth_service import AuthService
 from repository.user_repository import UserRepository
 from domain.user import UserCreate, UserResponse, UserInDB
 from api.deps import get_user_repo, get_current_user
+from core.ratelimit import limiter
+from fastapi import Request
 
 router = APIRouter()
 
 @router.post("/register", response_model=UserResponse)
+@limiter.limit("5/minute")
 async def register(
+    request: Request,
     user_in: UserCreate, 
     user_repo: UserRepository = Depends(get_user_repo)
 ):
@@ -16,7 +20,9 @@ async def register(
     return await auth_service.register_user(user_in)
 
 @router.post("/login")
+@limiter.limit("5/minute")
 async def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     user_repo: UserRepository = Depends(get_user_repo)
 ):
