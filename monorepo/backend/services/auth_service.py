@@ -17,14 +17,16 @@ class AuthService:
             )
 
         hashed_pw = get_password_hash(user_create.password)
-        new_user = UserInDB(
-            email=user_create.email,
-            hashed_password=hashed_pw,
-            role=user_create.role,
-            is_active=user_create.is_active
-        )
+        
+        # Create user data without the id - MongoDB will generate it
+        user_data = {
+            "email": user_create.email,
+            "hashed_password": hashed_pw,
+            "role": user_create.role,
+            "is_active": user_create.is_active
+        }
 
-        created_user = await self.user_repo.create_user(new_user)
+        created_user = await self.user_repo.create_user(user_data)
         return UserResponse(**created_user.model_dump(by_alias=True))
 
     async def authenticate_user(self, email: str, password: str):

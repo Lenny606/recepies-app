@@ -26,11 +26,19 @@ class UserRepository:
             return UserInDB(**user_doc)
         return None
 
-    async def create_user(self, user: UserInDB) -> UserInDB:
-        user_dict = user.model_dump(by_alias=True, exclude={"id"})
-        result = await self.collection.insert_one(user_dict)
-        user.id = str(result.inserted_id)
-        return user
+    async def create_user(self, user_data: dict) -> UserInDB:
+        """Create a new user. Accepts a dict without _id field."""
+        from datetime import datetime
+        
+        # Add created_at timestamp
+        user_data["created_at"] = datetime.utcnow()
+        
+        # Insert into MongoDB
+        result = await self.collection.insert_one(user_data)
+        
+        # Convert ObjectId to string and create UserInDB object
+        user_data["_id"] = str(result.inserted_id)
+        return UserInDB(**user_data)
 
     async def update_user(self, user_id: str, update_data: dict) -> bool:
         try:

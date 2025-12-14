@@ -6,7 +6,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Recipe App API"
     
     # MongoDB
-    MONGO_DB_URL: str = "mongodb://localhost:27017"
+    # MONGO_DB_URL: str = "mongodb://localhost:27017"
+    MONGO_DB_URL: str="mongodb+srv://thomaskravcik_db_user:QzXWPc4MzhSGa74L@cluster0.fg3jc65.mongodb.net/?appName=Cluster0"
     DATABASE_NAME: str = "recipe_app"
     
     # Security
