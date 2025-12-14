@@ -7,8 +7,14 @@ class Database:
     client: AsyncIOMotorClient = None
 
     def connect(self):
-        self.client = AsyncIOMotorClient(settings.MONGO_URI)
-        print(f"Connected to MongoDB at {settings.MONGO_URI}")
+        try:
+            self.client = AsyncIOMotorClient(settings.MONGO_DB_URL)
+            # Redact credentials in log output for security
+            log_url = settings.MONGO_DB_URL.split('@')[-1] if '@' in settings.MONGO_DB_URL else settings.MONGO_DB_URL
+            print(f"Connected to MongoDB at {log_url}")
+        except Exception as e:
+            print(f"Failed to connect to MongoDB: {e}")
+            raise
 
     def close(self):
         if self.client:
