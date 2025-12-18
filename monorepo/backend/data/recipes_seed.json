@@ -1,0 +1,78 @@
+[
+  {
+    "title": "Traditional Italian Pasta Carbonara",
+    "description": "A classic Roma pasta dish made with eggs, cheese, pancetta, and pepper.",
+    "steps": [
+      "Bring a large pot of salted water to a boil.",
+      "Add pasta and cook until al dente.",
+      "While pasta cooks, fry pancetta in a large pan until crispy.",
+      "In a bowl, whisk eggs and Pecorino Romano cheese together.",
+      "Drain pasta, reserving some cooking water.",
+      "Add pasta to the pan with pancetta, remove from heat.",
+      "Quickly stir in egg and cheese mixture, adding pasta water as needed for creaminess.",
+      "Season with plenty of black pepper and serve immediately."
+    ],
+    "ingredients": [
+      {
+        "name": "Spaghetti",
+        "amount": "400",
+        "unit": "g"
+      },
+      {
+        "name": "Guanciale or Pancetta",
+        "amount": "150",
+        "unit": "g"
+      },
+      {
+        "name": "Large Eggs",
+        "amount": "3",
+        "unit": ""
+      },
+      {
+        "name": "Pecorino Romano",
+        "amount": "50",
+        "unit": "g"
+      },
+      {
+        "name": "Black Pepper",
+        "amount": "to taste",
+        "unit": ""
+      }
+    ],
+    "tags": ["italian", "pasta", "classic", "quick"],
+    "visibility": "public"
+  },
+  {
+    "title": "Morning Berry Smoothie",
+    "description": "A refreshing and healthy way to start your day.",
+    "steps": [
+      "Place all ingredients into a blender.",
+      "Blend on high until smooth.",
+      "Pour into a glass and enjoy."
+    ],
+    "ingredients": [
+      {
+        "name": "Mixed Berries (frozen)",
+        "amount": "1",
+        "unit": "cup"
+      },
+      {
+        "name": "Greek Yogurt",
+        "amount": "0.5",
+        "unit": "cup"
+      },
+      {
+        "name": "Milk or Almond Milk",
+        "amount": "1",
+        "unit": "cup"
+      },
+      {
+        "name": "Honey or Maple Syrup",
+        "amount": "1",
+        "unit": "tbsp"
+      }
+    ],
+    "tags": ["breakfast", "smoothie", "healthy", "vegan-option"],
+    "visibility": "public"
+  }
+]
