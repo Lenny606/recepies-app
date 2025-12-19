@@ -6,7 +6,8 @@ import { ChevronLeft, Search, User } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 interface Recipe {
-    _id: string;
+    _id?: string;
+    id?: string;
     title: string;
     description?: string;
     author_id: string;
@@ -104,8 +105,8 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {recipes.map((recipe) => (
                             <Card
-                                key={recipe._id}
-                                onClick={() => onSelectRecipe(recipe._id)}
+                                key={recipe.id || recipe._id}
+                                onClick={() => onSelectRecipe((recipe.id || recipe._id)!)}
                                 className="group hover:shadow-lg transition-shadow cursor-pointer border-slate-200"
                             >
                                 <div className="p-1">

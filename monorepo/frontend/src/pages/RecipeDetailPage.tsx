@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { ChevronLeft, Clock, Users, Tag, ChefHat, Info } from 'lucide-react';
+import { ChevronLeft, Clock, Tag, ChefHat, Info } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 interface Ingredient {
@@ -11,7 +11,8 @@ interface Ingredient {
 }
 
 interface Recipe {
-    _id: string;
+    _id?: string;
+    id?: string;
     title: string;
     description?: string;
     steps: string[];
@@ -35,7 +36,12 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
         const fetchRecipe = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`);
+                const token = localStorage.getItem('access_token');
+                const response = await fetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 if (!response.ok) throw new Error('Nepodařilo se načíst detail receptu');
                 const data = await response.json();
                 setRecipe(data);
