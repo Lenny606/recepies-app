@@ -6,6 +6,7 @@ import { Input } from '../components/ui/Input';
 import { ChefHat, ArrowRight } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
+    const [error, setError] = useState<string | null>(null);
     const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -13,11 +14,17 @@ export const LoginPage: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
         if (!email || !password) return;
 
         setIsLoading(true);
-        await login(email);
-        setIsLoading(false);
+        try {
+            await login(email, password);
+        } catch (err: any) {
+            setError(err.message || 'Přihlášení se nezdařilo');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -34,6 +41,11 @@ export const LoginPage: React.FC = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    {error && (
+                        <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-200">
+                            {error}
+                        </div>
+                    )}
                     <Input
                         label="Email"
                         type="email"
@@ -59,10 +71,6 @@ export const LoginPage: React.FC = () => {
                         {isLoading ? 'Přihlašování...' : 'Vstoupit'}
                         {!isLoading && <ArrowRight className="w-4 h-4" />}
                     </Button>
-
-                    <p className="text-center text-xs text-slate-400 mt-4">
-                        Pro demo účely použijte libovolný email a heslo.
-                    </p>
                 </form>
             </Card>
         </div>

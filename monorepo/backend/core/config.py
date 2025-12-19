@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     DATABASE_NAME: str = "recipe_app"
     
     # Security
-    SECRET_KEY: str = "change_this_to_a_secure_random_string_in_production"
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7

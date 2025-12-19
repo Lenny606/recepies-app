@@ -10,7 +10,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
-    login: (email: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<void>;
     logout: () => void;
 }
 
@@ -19,22 +19,37 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
 
-    const login = async (email: string) => {
-        // Mock Login Logic
-        console.log(`Authenticating against: ${API_BASE_URL} (Mock)`);
-        return new Promise<void>((resolve) => {
-            setTimeout(() => {
-                setUser({
-                    id: '1',
-                    email: email,
-                    name: email.split('@')[0]
-                });
-                resolve();
-            }, 500); // Simulate network delay
+    const login = async (email: string, password: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                username: email,
+                password: password,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Login failed');
+        }
+
+        const data = await response.json();
+        const { access_token } = data;
+
+        localStorage.setItem('access_token', access_token);
+
+        setUser({
+            id: 'temp-id',
+            email: email,
+            name: email.split('@')[0]
         });
     };
 
     const logout = () => {
+        localStorage.removeItem('access_token');
         setUser(null);
     };
 
