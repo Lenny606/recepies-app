@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { ChevronLeft, Clock, Tag, ChefHat, Info } from 'lucide-react';
+import { ChevronLeft, Clock, Tag, ChefHat, Info, Video } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 interface Ingredient {
@@ -20,6 +20,7 @@ interface Recipe {
     tags: string[];
     author_id: string;
     created_at: string;
+    video_url?: string;
 }
 
 interface RecipeDetailPageProps {
@@ -113,6 +114,17 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                             <ChefHat className="w-5 h-5 text-emerald-500" />
                             <span>Autor: {recipe.author_id.substring(0, 8)}</span>
                         </div>
+                        {recipe.video_url && (
+                            <a
+                                href={recipe.video_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                            >
+                                <Video className="w-5 h-5" />
+                                <span>Přehrát video recept</span>
+                            </a>
+                        )}
                     </div>
                 </div>
 

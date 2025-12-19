@@ -13,6 +13,7 @@ interface Recipe {
     author_id: string;
     tags: string[];
     created_at: string;
+    video_url?: string;
 }
 
 interface PublicRecipesPageProps {
@@ -54,6 +55,8 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
         fetchRecipes(search);
     };
 
+
+
     return (
         <div className="min-h-screen bg-slate-50">
             {/* Header */}
@@ -68,6 +71,8 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                     </div>
                 </div>
             </header>
+
+
 
             <main className="max-w-7xl mx-auto px-4 py-8">
                 {/* Search Bar */}

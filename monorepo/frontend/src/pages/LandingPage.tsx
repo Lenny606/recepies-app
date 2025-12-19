@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { LogOut, Plus, Search, Sparkles } from 'lucide-react';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
+import { API_BASE_URL } from '../config';
+import { Modal } from '../components/ui/Modal';
+import { RecipeForm } from '../components/RecipeForm';
 
 interface LandingPageProps {
     onNavigateToPublic: () => void;
@@ -11,6 +14,36 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic }) => {
     const { user, logout } = useAuth();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleCreateRecipe = async (recipeData: any) => {
+        setIsSubmitting(true);
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`${API_BASE_URL}/api/v1/recipes/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(recipeData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Nepodařilo se vytvořit recept');
+            }
+
+            // In a real app, we might want to refresh the local list if we had one
+            setIsModalOpen(false);
+            // Optionally redirect or show success message
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Nastala chyba při vytváření receptu');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-50">
@@ -34,6 +67,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic }) 
             </header>
 
             {/* Main Content */}
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title="Vytvořit nový recept"
+            >
+                <RecipeForm
+                    onSubmit={handleCreateRecipe}
+                    onCancel={() => setIsModalOpen(false)}
+                    isSubmitting={isSubmitting}
+                />
+            </Modal>
+
             <main className="max-w-7xl mx-auto px-4 py-8">
 
                 {/* Helper Actions */}
@@ -46,7 +91,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic }) 
                         // For "vibe", let's assume default input handles standard usage, we override padding via className.
                         />
                     </div>
-                    <Button className="flex items-center gap-2 justify-center">
+                    <Button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 justify-center"
+                    >
                         <Plus className="w-5 h-5" />
                         Nový recept
                     </Button>
