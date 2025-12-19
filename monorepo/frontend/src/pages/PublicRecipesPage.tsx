@@ -16,9 +16,10 @@ interface Recipe {
 
 interface PublicRecipesPageProps {
     onBack: () => void;
+    onSelectRecipe: (id: string) => void;
 }
 
-export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack }) => {
+export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, onSelectRecipe }) => {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -102,7 +103,11 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack }) 
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {recipes.map((recipe) => (
-                            <Card key={recipe._id} className="group hover:shadow-lg transition-shadow cursor-pointer border-slate-200">
+                            <Card
+                                key={recipe._id}
+                                onClick={() => onSelectRecipe(recipe._id)}
+                                className="group hover:shadow-lg transition-shadow cursor-pointer border-slate-200"
+                            >
                                 <div className="p-1">
                                     <div className="h-40 bg-slate-100 rounded-lg mb-4 flex items-center justify-center text-4xl group-hover:bg-emerald-50 transition-colors">
                                         🥘

@@ -1,0 +1,190 @@
+import React, { useEffect, useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { ChevronLeft, Clock, Users, Tag, ChefHat, Info } from 'lucide-react';
+import { API_BASE_URL } from '../config';
+
+interface Ingredient {
+    name: string;
+    amount: string;
+    unit?: string;
+}
+
+interface Recipe {
+    _id: string;
+    title: string;
+    description?: string;
+    steps: string[];
+    ingredients: Ingredient[];
+    tags: string[];
+    author_id: string;
+    created_at: string;
+}
+
+interface RecipeDetailPageProps {
+    recipeId: string;
+    onBack: () => void;
+}
+
+export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, onBack }) => {
+    const [recipe, setRecipe] = useState<Recipe | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchRecipe = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`);
+                if (!response.ok) throw new Error('Nepodařilo se načíst detail receptu');
+                const data = await response.json();
+                setRecipe(data);
+                setError(null);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Nastala chyba');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRecipe();
+    }, [recipeId]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
+                <p className="text-slate-500">Připravuji ingredience...</p>
+            </div>
+        );
+    }
+
+    if (error || !recipe) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 text-center">
+                <div className="text-6xl mb-4">🌪️</div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Ups! Recept zmizel</h3>
+                <p className="text-slate-500 mb-6">{error || 'Recept nebyl nalezen.'}</p>
+                <Button onClick={onBack}>Zpět na seznam</Button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-slate-50 pb-20">
+            {/* Header */}
+            <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+                <div className="max-w-4xl mx-auto px-4 h-16 flex items-center gap-4">
+                    <Button variant="secondary" onClick={onBack} className="!p-2">
+                        <ChevronLeft className="w-5 h-5" />
+                    </Button>
+                    <h1 className="font-bold text-lg text-slate-800 truncate">{recipe.title}</h1>
+                </div>
+            </header>
+
+            <main className="max-w-4xl mx-auto px-4 py-8">
+                {/* Hero Section */}
+                <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 mb-8">
+                    <div className="flex flex-wrap gap-2 mb-6">
+                        {recipe.tags.map(tag => (
+                            <span key={tag} className="flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-full border border-emerald-100">
+                                <Tag className="w-3 h-3" />
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                    <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">{recipe.title}</h2>
+                    <p className="text-lg text-slate-600 leading-relaxed mb-8">
+                        {recipe.description || 'Tento recept zatím nemá popis, ale určitě stojí za vyzkoušení!'}
+                    </p>
+
+                    <div className="flex flex-wrap gap-6 pt-6 border-t border-slate-100 text-slate-500">
+                        <div className="flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-emerald-500" />
+                            <span>Publikováno: {new Date(recipe.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <ChefHat className="w-5 h-5 text-emerald-500" />
+                            <span>Autor: {recipe.author_id.substring(0, 8)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* Ingredients */}
+                    <aside className="md:col-span-1">
+                        <Card className="sticky top-24 border-slate-200">
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <Utensils className="w-5 h-5 text-emerald-600" />
+                                Ingredience
+                            </h3>
+                            <ul className="space-y-4">
+                                {recipe.ingredients.map((ing, idx) => (
+                                    <li key={idx} className="flex justify-between items-start gap-4 pb-3 border-b border-slate-50 last:border-0">
+                                        <span className="text-slate-700 font-medium">{ing.name}</span>
+                                        <span className="text-emerald-600 font-bold whitespace-nowrap">
+                                            {ing.amount} {ing.unit}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                            {recipe.ingredients.length === 0 && (
+                                <p className="text-slate-400 italic">Seznam ingrediencí je prázdný.</p>
+                            )}
+                        </Card>
+                    </aside>
+
+                    {/* Steps */}
+                    <section className="md:col-span-2">
+                        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200">
+                            <h3 className="text-xl font-bold text-slate-900 mb-8 flex items-center gap-2">
+                                <ChefHat className="w-6 h-6 text-emerald-600" />
+                                Postup přípravy
+                            </h3>
+                            <div className="space-y-10">
+                                {recipe.steps.map((step, idx) => (
+                                    <div key={idx} className="flex gap-6">
+                                        <div className="flex-shrink-0 w-10 h-10 bg-emerald-600 text-white rounded-2xl flex items-center justify-center font-black shadow-lg shadow-emerald-100">
+                                            {idx + 1}
+                                        </div>
+                                        <div className="pt-2">
+                                            <p className="text-slate-700 leading-relaxed text-lg">
+                                                {step}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                                {recipe.steps.length === 0 && (
+                                    <div className="text-center py-10 text-slate-400">
+                                        <Info className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                                        <p>Autor k tomuto receptu zatím nepřidal postup.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    );
+};
+
+// Simple Utensils fallback if not imported
+const Utensils = ({ className }: { className?: string }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+        <path d="M7 2v20" />
+        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+    </svg>
+);
