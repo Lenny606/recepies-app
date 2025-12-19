@@ -5,7 +5,11 @@ import { LogOut, Plus, Search, Sparkles } from 'lucide-react';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 
-export const LandingPage: React.FC = () => {
+interface LandingPageProps {
+    onNavigateToPublic: () => void;
+}
+
+export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic }) => {
     const { user, logout } = useAuth();
 
     return (
@@ -63,7 +67,7 @@ export const LandingPage: React.FC = () => {
                     <p className="text-slate-500 max-w-lg mx-auto mb-8">
                         Zatím zde nejsou žádné recepty. Začněte přidáním svého prvního kulinářského díla nebo se zeptejte AI na inspiraci.
                     </p>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={onNavigateToPublic}>
                         Procházet veřejné recepty
                     </Button>
                 </div>
