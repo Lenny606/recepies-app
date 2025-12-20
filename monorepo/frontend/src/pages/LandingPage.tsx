@@ -13,19 +13,17 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic }) => {
-    const { user, logout } = useAuth();
+    const { user, logout, authenticatedFetch } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleCreateRecipe = async (recipeData: any) => {
         setIsSubmitting(true);
         try {
-            const token = localStorage.getItem('access_token');
-            const response = await fetch(`${API_BASE_URL}/api/v1/recipes/`, {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(recipeData)
             });

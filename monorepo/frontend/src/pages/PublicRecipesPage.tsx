@@ -25,7 +25,7 @@ interface PublicRecipesPageProps {
 }
 
 export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, onSelectRecipe }) => {
-    const { user } = useAuth();
+    const { user, authenticatedFetch } = useAuth();
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -70,13 +70,11 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
         if (!editingRecipe) return;
         setIsSubmitting(true);
         try {
-            const token = localStorage.getItem('access_token');
             const recipeId = editingRecipe.id || editingRecipe._id;
-            const response = await fetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`, {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(updateData)
             });

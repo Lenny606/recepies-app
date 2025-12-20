@@ -33,7 +33,7 @@ interface RecipeDetailPageProps {
 }
 
 export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, onBack }) => {
-    const { user } = useAuth();
+    const { user, authenticatedFetch } = useAuth();
     const [recipe, setRecipe] = useState<Recipe | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -44,12 +44,7 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
         const fetchRecipe = async () => {
             setLoading(true);
             try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+                const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`);
                 if (!response.ok) throw new Error('Nepodařilo se načíst detail receptu');
                 const data = await response.json();
                 setRecipe(data);
@@ -87,12 +82,10 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
     const handleUpdateRecipe = async (updateData: any) => {
         setIsSubmitting(true);
         try {
-            const token = localStorage.getItem('access_token');
-            const response = await fetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`, {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(updateData)
             });

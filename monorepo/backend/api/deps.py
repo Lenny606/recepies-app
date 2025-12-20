@@ -47,3 +47,25 @@ async def get_current_admin_user(current_user: UserInDB = Depends(get_current_ac
     if current_user.role != "admin":
         raise HTTPException(status_code=400, detail="The user doesn't have enough privileges")
     return current_user
+async def get_current_user_from_refresh_token(
+    token: str, 
+    user_repo: UserRepository = Depends(get_user_repo)
+) -> UserInDB:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate refresh token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        email: str = payload.get("sub")
+        token_type: str = payload.get("type")
+        if email is None or token_type != "refresh":
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+        
+    user = await user_repo.get_by_email(email)
+    if user is None:
+        raise credentials_exception
+    return user
