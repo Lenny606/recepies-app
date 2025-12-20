@@ -4,7 +4,7 @@ from domain.recipe import RecipeCreate, RecipeUpdate, RecipeResponse, Visibility
 from domain.user import UserInDB
 from services.recipe_service import RecipeService
 from repository.recipe_repository import RecipeRepository
-from api.deps import get_current_user, get_recipe_repo
+from api.deps import get_current_user, get_current_user_optional, get_recipe_repo
 
 router = APIRouter()
 
@@ -34,19 +34,15 @@ async def read_my_recipes(
 @router.get("/{recipe_id}", response_model=RecipeResponse)
 async def read_recipe(
     recipe_id: str,
-    # We might want to allow viewing without auth for public recipes.
-    # But `get_current_user` raises 401. 
-    # Let's try to support public view without auth.
+    # Let's support public view without auth.
     # We'll rely on the service to check visibility.
     # If no user token is provided, we pass None as user_id.
-    # But FastAPI dependencies are strict.
-    # We'll make two endpoints or use a custom dependency.
-    # Let's force auth for now for detailed view to keep it simple, OR implement `get_current_user_optional`.
-    current_user: UserInDB = Depends(get_current_user), 
+    current_user: Optional[UserInDB] = Depends(get_current_user_optional), 
     recipe_repo: RecipeRepository = Depends(get_recipe_repo)
 ):
     service = RecipeService(recipe_repo)
-    return await service.get_recipe(recipe_id, current_user.id)
+    user_id = current_user.id if current_user else None
+    return await service.get_recipe(recipe_id, user_id)
 
 @router.put("/{recipe_id}", response_model=RecipeResponse)
 async def update_recipe(

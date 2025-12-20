@@ -46,12 +46,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
-        let token = localStorage.getItem('access_token');
-
-        const headers = {
-            ...options.headers,
-            'Authorization': `Bearer ${token}`
+        const token = localStorage.getItem('access_token');
+        const headers: Record<string, string> = {
+            ...(options.headers as Record<string, string>),
         };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
 
         let response = await fetch(url, { ...options, headers });
 

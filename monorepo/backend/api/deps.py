@@ -1,4 +1,5 @@
 from fastapi import Depends, HTTPException, status
+from typing import Optional
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from core.config import get_settings
@@ -8,6 +9,7 @@ from repository.recipe_repository import RecipeRepository
 from domain.user import UserInDB
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 settings = get_settings()
 
 async def get_user_repo(db = Depends(get_database)) -> UserRepository:
@@ -36,6 +38,23 @@ async def get_current_user(
     user = await user_repo.get_by_email(email)
     if user is None:
         raise credentials_exception
+    return user
+
+async def get_current_user_optional(
+    token: Optional[str] = Depends(oauth2_scheme_optional),
+    user_repo: UserRepository = Depends(get_user_repo)
+) -> Optional[UserInDB]:
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+    except JWTError:
+        return None
+        
+    user = await user_repo.get_by_email(email)
     return user
 
 async def get_current_active_user(current_user: UserInDB = Depends(get_current_user)) -> UserInDB:
