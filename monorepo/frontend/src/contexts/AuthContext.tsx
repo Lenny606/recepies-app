@@ -41,11 +41,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         localStorage.setItem('access_token', access_token);
 
-        setUser({
-            id: 'temp-id',
-            email: email,
-            name: email.split('@')[0]
+        // Fetch user profile
+        const userResponse = await fetch(`${API_BASE_URL}/api/v1/users/me`, {
+            headers: {
+                'Authorization': `Bearer ${access_token}`
+            }
         });
+
+        if (userResponse.ok) {
+            const userData = await userResponse.json();
+            setUser({
+                id: userData.id || userData._id,
+                email: userData.email,
+                name: userData.email.split('@')[0]
+            });
+        }
     };
 
     const logout = () => {

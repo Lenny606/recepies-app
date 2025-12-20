@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { ChevronLeft, Clock, Tag, ChefHat, Info, Video } from 'lucide-react';
+import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { useAuth } from '../contexts/AuthContext';
+import { Modal } from '../components/ui/Modal';
+import { RecipeForm } from '../components/RecipeForm';
 
 interface Ingredient {
     name: string;
@@ -21,6 +24,7 @@ interface Recipe {
     author_id: string;
     created_at: string;
     video_url?: string;
+    visibility: string;
 }
 
 interface RecipeDetailPageProps {
@@ -29,9 +33,12 @@ interface RecipeDetailPageProps {
 }
 
 export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, onBack }) => {
+    const { user } = useAuth();
     const [recipe, setRecipe] = useState<Recipe | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchRecipe = async () => {
@@ -77,17 +84,69 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
         );
     }
 
+    const handleUpdateRecipe = async (updateData: any) => {
+        setIsSubmitting(true);
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Nepodařilo se aktualizovat recept');
+            }
+
+            const updatedRecipe = await response.json();
+            setRecipe(updatedRecipe);
+            setIsEditModalOpen(false);
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Nastala chyba při aktualizaci receptu');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
             {/* Header */}
             <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-                <div className="max-w-4xl mx-auto px-4 h-16 flex items-center gap-4">
-                    <Button variant="secondary" onClick={onBack} className="!p-2">
-                        <ChevronLeft className="w-5 h-5" />
-                    </Button>
-                    <h1 className="font-bold text-lg text-slate-800 truncate">{recipe.title}</h1>
+                <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <Button variant="secondary" onClick={onBack} className="!p-2">
+                            <ChevronLeft className="w-5 h-5" />
+                        </Button>
+                        <h1 className="font-bold text-lg text-slate-800 truncate">{recipe.title}</h1>
+                    </div>
+                    {user && recipe.author_id === user.id && (
+                        <Button
+                            onClick={() => setIsEditModalOpen(true)}
+                            className="flex items-center gap-2"
+                        >
+                            <Edit className="w-4 h-4" />
+                            <span className="hidden sm:inline">Upravit</span>
+                        </Button>
+                    )}
                 </div>
             </header>
+
+            <Modal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                title="Upravit recept"
+            >
+                <RecipeForm
+                    onSubmit={handleUpdateRecipe}
+                    onCancel={() => setIsEditModalOpen(false)}
+                    isSubmitting={isSubmitting}
+                    initialData={recipe}
+                />
+            </Modal>
 
             <main className="max-w-4xl mx-auto px-4 py-8">
                 {/* Hero Section */}

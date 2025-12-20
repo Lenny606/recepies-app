@@ -6,23 +6,36 @@ import { Plus, Trash2, Video } from 'lucide-react';
 interface Ingredient {
     name: string;
     amount: string;
-    unit: string;
+    unit?: string;
+}
+
+interface Recipe {
+    id?: string;
+    _id?: string;
+    title: string;
+    description?: string;
+    video_url?: string;
+    steps: string[];
+    ingredients: Ingredient[];
+    tags: string[];
+    visibility: string;
 }
 
 interface RecipeFormProps {
     onSubmit: (data: any) => Promise<void>;
     onCancel: () => void;
     isSubmitting?: boolean;
+    initialData?: Partial<Recipe>;
 }
 
-export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSubmitting }) => {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [videoUrl, setVideoUrl] = useState('');
-    const [steps, setSteps] = useState<string[]>(['']);
-    const [ingredients, setIngredients] = useState<Ingredient[]>([{ name: '', amount: '', unit: '' }]);
-    const [tags, setTags] = useState('');
-    const [visibility, setVisibility] = useState('public');
+export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSubmitting, initialData }) => {
+    const [title, setTitle] = useState(initialData?.title || '');
+    const [description, setDescription] = useState(initialData?.description || '');
+    const [videoUrl, setVideoUrl] = useState(initialData?.video_url || '');
+    const [steps, setSteps] = useState<string[]>(initialData?.steps || ['']);
+    const [ingredients, setIngredients] = useState<Ingredient[]>(initialData?.ingredients || [{ name: '', amount: '', unit: '' }]);
+    const [tags, setTags] = useState(initialData?.tags?.join(', ') || '');
+    const [visibility, setVisibility] = useState(initialData?.visibility || 'public');
 
     const handleAddStep = () => setSteps([...steps, '']);
     const handleRemoveStep = (index: number) => setSteps(steps.filter((_, i) => i !== index));
@@ -187,7 +200,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
                     Zrušit
                 </Button>
                 <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                    {isSubmitting ? 'Ukládám...' : 'Vytvořit recept'}
+                    {isSubmitting ? 'Ukládám...' : (initialData ? 'Uložit změny' : 'Vytvořit recept')}
                 </Button>
             </div>
         </form>

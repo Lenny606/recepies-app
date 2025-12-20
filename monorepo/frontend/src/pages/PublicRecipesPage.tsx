@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { ChevronLeft, Search, User } from 'lucide-react';
+import { ChevronLeft, Search, User, Edit } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { useAuth } from '../contexts/AuthContext';
+import { Modal } from '../components/ui/Modal';
+import { RecipeForm } from '../components/RecipeForm';
 
 interface Recipe {
     _id?: string;
@@ -22,10 +25,13 @@ interface PublicRecipesPageProps {
 }
 
 export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, onSelectRecipe }) => {
+    const { user } = useAuth();
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchRecipes = async (searchTerm = '') => {
         setLoading(true);
@@ -53,6 +59,41 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         fetchRecipes(search);
+    };
+
+    const handleEditClick = (e: React.MouseEvent, recipe: Recipe) => {
+        e.stopPropagation();
+        setEditingRecipe(recipe);
+    };
+
+    const handleUpdateRecipe = async (updateData: any) => {
+        if (!editingRecipe) return;
+        setIsSubmitting(true);
+        try {
+            const token = localStorage.getItem('access_token');
+            const recipeId = editingRecipe.id || editingRecipe._id;
+            const response = await fetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Nepodařilo se aktualizovat recept');
+            }
+
+            const updatedRecipe = await response.json();
+            setRecipes(recipes.map(r => (r.id === updatedRecipe.id || r._id === updatedRecipe._id) ? updatedRecipe : r));
+            setEditingRecipe(null);
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Nastala chyba při aktualizaci receptu');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
 
@@ -138,13 +179,39 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                                             <User className="w-3 h-3" />
                                             <span>Autor: {recipe.author_id.substring(0, 8)}</span>
                                         </div>
-                                        <span>{new Date(recipe.created_at).toLocaleDateString()}</span>
+                                        <div className="flex items-center gap-4">
+                                            {user && recipe.author_id === user.id && (
+                                                <button
+                                                    onClick={(e) => handleEditClick(e, recipe)}
+                                                    className="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-medium"
+                                                >
+                                                    <Edit className="w-3 h-3" />
+                                                    <span>Upravit</span>
+                                                </button>
+                                            )}
+                                            <span>{new Date(recipe.created_at).toLocaleDateString()}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </Card>
                         ))}
                     </div>
                 )}
+
+                <Modal
+                    isOpen={!!editingRecipe}
+                    onClose={() => setEditingRecipe(null)}
+                    title="Upravit recept"
+                >
+                    {editingRecipe && (
+                        <RecipeForm
+                            onSubmit={handleUpdateRecipe}
+                            onCancel={() => setEditingRecipe(null)}
+                            isSubmitting={isSubmitting}
+                            initialData={editingRecipe}
+                        />
+                    )}
+                </Modal>
             </main>
         </div>
     );
