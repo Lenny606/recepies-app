@@ -135,6 +135,24 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
         }
     };
 
+    const getYouTubeEmbedUrl = (url: string) => {
+        if (!url) return null;
+
+        // Match YouTube video ID
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+
+        const videoId = (match && match[2].length === 11) ? match[2] : null;
+
+        if (videoId) {
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+
+        return null;
+    };
+
+    const videoEmbedUrl = recipe.video_url ? getYouTubeEmbedUrl(recipe.video_url) : null;
+
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
             {/* Header */}
@@ -216,11 +234,27 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                                 className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
                             >
                                 <Video className="w-5 h-5" />
-                                <span>Přehrát video recept</span>
+                                <span>Otevřít původní video</span>
                             </a>
                         )}
                     </div>
                 </div>
+
+                {/* Video Playback Section */}
+                {videoEmbedUrl && (
+                    <div className="mb-8">
+                        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-200 aspect-video">
+                            <iframe
+                                className="w-full h-full"
+                                src={videoEmbedUrl}
+                                title={`${recipe.title} video playback`}
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                            ></iframe>
+                        </div>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Ingredients */}
