@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit, Utensils, Trash2 } from 'lucide-react';
+import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit, Utensils, Trash2, Sparkles } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 import { Modal } from '../components/ui/Modal';
@@ -40,6 +40,7 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
     const [error, setError] = useState<string | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     useEffect(() => {
         const fetchRecipe = async () => {
@@ -106,6 +107,40 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
         }
     };
 
+    const handleAIAnalyze = async () => {
+        if (!recipe?.video_url) return;
+
+        setIsAnalyzing(true);
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/agent/analyze-video/${recipeId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: recipe.video_url })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Analýza AI se nezdařila');
+            }
+
+            const result = await response.json();
+            alert(result.message || 'Recept byl úspěšně aktualizován pomocí AI.');
+
+            // Refresh recipe data
+            const refreshResponse = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`);
+            if (refreshResponse.ok) {
+                const data = await refreshResponse.json();
+                setRecipe(data);
+            }
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Nastala chyba při AI analýze');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
     const handleDeleteRecipe = async () => {
         if (!window.confirm('Opravdu chcete tento recept smazat? Tato akce je nevratná.')) {
             return;
@@ -152,9 +187,20 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                     {user && user.id && recipe.author_id && String(recipe.author_id) === String(user.id) && (
                         <div className="flex items-center gap-2">
                             <Button
+                                onClick={handleAIAnalyze}
+                                disabled={isAnalyzing || !recipe.video_url}
+                                className={`flex items-center gap-2 cursor-pointer ${isAnalyzing ? 'animate-pulse' : ''
+                                    } !bg-indigo-600 hover:!bg-indigo-700 !text-white`}
+                            >
+                                <Sparkles className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
+                                <span className="hidden sm:inline">
+                                    {isAnalyzing ? 'Analyzuji...' : 'AI Analyzovat'}
+                                </span>
+                            </Button>
+                            <Button
                                 onClick={() => setIsEditModalOpen(true)}
                                 className="flex items-center gap-2 cursor-pointer"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isAnalyzing}
                             >
                                 <Edit className="w-4 h-4 " />
                                 <span className="hidden sm:inline">Upravit</span>
@@ -163,7 +209,7 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                                 variant="secondary"
                                 onClick={handleDeleteRecipe}
                                 className="flex items-center gap-2 !text-red-600 !border-red-100 hover:!bg-red-50 cursor-pointer"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isAnalyzing}
                             >
                                 <Trash2 className="w-4 h-4" />
                                 <span className="hidden sm:inline">Smazat</span>

@@ -21,14 +21,14 @@ async def chat_with_agent(
 @router.post("/analyze-video/{recipe_id}")
 async def analyze_video_recipe(
     recipe_id: str,
-    video_url: str,
+    request: ChatRequest,
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)
 ):
     """
     Analyze a video and update an existing recipe with the details.
     """
-    success = await ai_service.analyze_video_and_update_recipe(recipe_id, video_url)
+    success = await ai_service.analyze_video_and_update_recipe(recipe_id, request.message)
     if not success:
         return {"status": "error", "message": "Failed to update recipe from AI analysis"}
     return {"status": "success", "message": "Recipe updated successfully"}
