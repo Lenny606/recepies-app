@@ -20,6 +20,7 @@ class RecipeBase(BaseModel):
     tags: Optional[List[str]] = []
     visibility: Optional[Visibility] = Visibility.PRIVATE
     video_url: Optional[str] = None
+    image_url: Optional[str] = None
 
 class RecipeCreate(RecipeBase):
     pass
@@ -32,6 +33,7 @@ class RecipeUpdate(BaseModel):
     tags: Optional[List[str]] = []
     visibility: Optional[Visibility] = None
     video_url: Optional[str] = None
+    image_url: Optional[str] = None
 
 class RecipeInDB(RecipeBase):
     id: Optional[str] = Field(None, alias="_id")
