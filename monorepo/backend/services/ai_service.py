@@ -1,13 +1,21 @@
 import json
 import re
+import base64
+import numpy as np
+import cv2
+import yt_dlp
 from openai import OpenAI
 from core.config import get_settings
 from domain.recipe import RecipeUpdate, Ingredient
 from repository.recipe_repository import RecipeRepository
 from datetime import datetime
+from typing import List, Union, Dict
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 settings = get_settings()
-
+video_upload_url = "https://generativelanguage.googleapis.com/upload/v1beta/files?key=" + os.getenv("GEMINI_API_KEY")
 class AIService:
     def __init__(self, recipe_repo: RecipeRepository = None):
         # Gemini API via OpenAI compatibility layer
@@ -18,19 +26,78 @@ class AIService:
         self.model = settings.GEMINI_MODEL_NAME
         self.recipe_repo = recipe_repo
 
-    async def get_chat_completion(self, message: str) -> str:
+    def _extract_frames(self, video_url: str, num_frames: int = 15) -> List[str]:
         """
-        Simple chat completion using Gemini via OpenAI library.
+        Extracts frames from a video URL using yt-dlp and OpenCV.
+        Returns a list of base64 encoded JPEG strings.
+        """
+        try:
+            ydl_opts = {
+                'format': 'best[height<=480]', # Low res is enough for AI and faster to process
+                'noplaylist': True,
+                'quiet': True,
+                'no_warnings': True,
+            }
+            
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(video_url, download=False)
+                stream_url = info['url']
+                
+            cap = cv2.VideoCapture(stream_url)
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            
+            if total_frames <= 0:
+                cap.release()
+                return []
+                
+            # Sample frames evenly across the video
+            indices = np.linspace(0, total_frames - 1, num_frames, dtype=int)
+            frames_b64 = []
+            
+            for idx in indices:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+                ret, frame = cap.read()
+                if not ret:
+                    continue
+                
+                # Optional: Resize to further reduce payload if needed
+                # frame = cv2.resize(frame, (640, 360))
+                
+                _, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+                b64 = base64.b64encode(buffer).decode('utf-8')
+                frames_b64.append(b64)
+                
+            cap.release()
+            return frames_b64
+        except Exception as e:
+            print(f"Error extracting frames: {e}")
+            return []
+
+    async def get_chat_completion(self, message: str, frames: List[str] = None) -> str:
+        """
+        Enhanced chat completion that can handle text and/or a sequence of video frames.
         """
         if not settings.GEMINI_API_KEY:
             return "AI feature is not configured. Please add GEMINI_API_KEY to .env"
+
+        content = [{"type": "text", "text": message}]
+        
+        if frames:
+            for frame_b64 in frames:
+                content.append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{frame_b64}"}
+                })
 
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "You are a helpful culinary assistant for a recipe application. Primary role is to analyze video constent passed via url and return an information about the recepy in a structured JSON format. Return only JSON object with the following fields: title, ingredients, instructions, tags, image_url."},
-                    {"role": "user", "content": message},
+                    {
+                        "role": "system", 
+                        "content": "You are a helpful culinary assistant. Analyze the provided text and/or video frames to extract recipe details. Return only a JSON object with fields: title, ingredients, instructions, tags, image_url."
+                    },
+                    {"role": "user", "content": content},
                 ]
             )
             return response.choices[0].message.content
@@ -39,29 +106,28 @@ class AIService:
 
     async def analyze_video_and_update_recipe(self, recipe_id: str, video_url: str) -> bool:
         """
-        Analyzes a video URL and updates an existing recipe with the details.
+        Analyzes a video by extracting frames and then updates the recipe in the DB.
         """
         if not self.recipe_repo:
             return False
 
-        ai_response = await self.get_chat_completion(video_url)
+        # 1. Extract frames (Binary data representation)
+        print(f"Extracting frames from {video_url}...")
+        frames = self._extract_frames(video_url)
         
-        # Try to extract JSON from the response (handling markdown blocks)
+        prompt = f"Analyze this video from URL: {video_url}. Extract the recipe details based on the visual content and title."
+        
+        # 2. Get AI analysis
+        ai_response = await self.get_chat_completion(prompt, frames=frames)
+        
+        # 3. Parse and save
         json_match = re.search(r"```json\n(.*?)\n```", ai_response, re.DOTALL)
-        if json_match:
-            json_str = json_match.group(1)
-        else:
-            json_str = ai_response
+        json_str = json_match.group(1) if json_match else ai_response
 
         try:
             data = json.loads(json_str)
-            
-            # Map AI ingredients (strings) to Ingredient objects
-            ingredients = []
-            for ing_str in data.get("ingredients", []):
-                ingredients.append(Ingredient(name=ing_str, amount="", unit=""))
+            ingredients = [Ingredient(name=ing, amount="", unit="") for ing in data.get("ingredients", [])]
 
-            # Create update object
             update_data = RecipeUpdate(
                 title=data.get("title"),
                 steps=data.get("instructions"),
@@ -70,14 +136,12 @@ class AIService:
                 image_url=data.get("image_url")
             )
 
-            # Update in DB
             update_dict = update_data.model_dump(exclude_unset=True)
             update_dict["updated_at"] = datetime.utcnow()
             
             return await self.recipe_repo.update(recipe_id, update_dict)
-            
         except Exception as e:
-            print(f"Error parsing AI response or updating recipe: {e}")
+            print(f"Error updating recipe: {e}")
             return False
 
 # Dependency

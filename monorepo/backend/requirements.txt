@@ -10,3 +10,5 @@ email-validator>=2.1.0
 slowapi>=0.1.9
 # python -m pip install "pymongo[srv]==3.12"
 openai>=1.0.0
+yt-dlp
+opencv-python-headless
