@@ -116,7 +116,7 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                         </Button>
                         <h1 className="font-bold text-lg text-slate-800 truncate">{recipe.title}</h1>
                     </div>
-                    {user && recipe.author_id === user.id && (
+                    {user && user.id && recipe.author_id && String(recipe.author_id) === String(user.id) && (
                         <Button
                             onClick={() => setIsEditModalOpen(true)}
                             className="flex items-center gap-2"

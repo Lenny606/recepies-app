@@ -10,6 +10,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
+    isInitialLoading: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
     authenticatedFetch: (url: string, options?: RequestInit) => Promise<Response>;
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
 
     const refreshAccessToken = async () => {
         const refreshToken = localStorage.getItem('refresh_token');
@@ -110,6 +112,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     }
                 }
             }
+            setIsInitialLoading(false);
         };
         initAuth();
     }, []);
@@ -149,6 +152,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         <AuthContext.Provider value={{
             user,
             isAuthenticated: !!localStorage.getItem('access_token'),
+            isInitialLoading,
             login,
             logout,
             authenticatedFetch

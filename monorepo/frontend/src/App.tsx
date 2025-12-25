@@ -6,9 +6,18 @@ import { RecipeDetailPage } from './pages/RecipeDetailPage';
 import { useState } from 'react';
 
 const AppContent = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isInitialLoading } = useAuth();
   const [view, setView] = useState<'home' | 'public' | 'detail'>('home');
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
+
+  if (isInitialLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
+        <p className="text-slate-500 font-medium">Běží kuchtění v pozadí...</p>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) return <LoginPage />;
 

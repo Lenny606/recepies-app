@@ -178,7 +178,7 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                                             <span>Autor: {recipe.author_id.substring(0, 8)}</span>
                                         </div>
                                         <div className="flex items-center gap-4">
-                                            {user && recipe.author_id === user.id && (
+                                            {user && user.id && recipe.author_id && String(recipe.author_id) === String(user.id) && (
                                                 <button
                                                     onClick={(e) => handleEditClick(e, recipe)}
                                                     className="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-medium"
