@@ -15,10 +15,10 @@ class Ingredient(BaseModel):
 class RecipeBase(BaseModel):
     title: str
     description: Optional[str] = None
-    steps: List[str] = []
-    ingredients: List[Ingredient] = []
-    tags: List[str] = []
-    visibility: Visibility = Visibility.PRIVATE
+    steps: Optional[List[str]] = []
+    ingredients: Optional[List[Ingredient]] = []
+    tags: Optional[List[str]] = []
+    visibility: Optional[Visibility] = Visibility.PRIVATE
     video_url: Optional[str] = None
 
 class RecipeCreate(RecipeBase):
@@ -27,17 +27,17 @@ class RecipeCreate(RecipeBase):
 class RecipeUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
-    steps: Optional[List[str]] = None
-    ingredients: Optional[List[Ingredient]] = None
-    tags: Optional[List[str]] = None
+    steps: Optional[List[str]] = []
+    ingredients: Optional[List[Ingredient]] = []
+    tags: Optional[List[str]] = []
     visibility: Optional[Visibility] = None
     video_url: Optional[str] = None
 
 class RecipeInDB(RecipeBase):
-    id: str = Field(alias="_id")
+    id: Optional[str] = Field(None, alias="_id")
     author_id: str
-    created_at: datetime = datetime.utcnow()
-    updated_at: datetime = datetime.utcnow()
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Config:
         populate_by_name = True
