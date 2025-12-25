@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit, Utensils } from 'lucide-react';
+import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit, Utensils, Trash2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 import { Modal } from '../components/ui/Modal';
@@ -105,6 +105,36 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
         }
     };
 
+    const handleDeleteRecipe = async () => {
+        if (!window.confirm('Opravdu chcete tento recept smazat? Tato akce je nevratná.')) {
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                if (response.status === 204) {
+                    // Success, but empty body
+                    onBack();
+                    return;
+                }
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Nepodařilo se smazat recept');
+            }
+
+            // Success (usually 204 No Content)
+            onBack();
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Nastala chyba při mazání receptu');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
             {/* Header */}
@@ -117,13 +147,25 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                         <h1 className="font-bold text-lg text-slate-800 truncate">{recipe.title}</h1>
                     </div>
                     {user && user.id && recipe.author_id && String(recipe.author_id) === String(user.id) && (
-                        <Button
-                            onClick={() => setIsEditModalOpen(true)}
-                            className="flex items-center gap-2"
-                        >
-                            <Edit className="w-4 h-4" />
-                            <span className="hidden sm:inline">Upravit</span>
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                onClick={() => setIsEditModalOpen(true)}
+                                className="flex items-center gap-2"
+                                disabled={isSubmitting}
+                            >
+                                <Edit className="w-4 h-4" />
+                                <span className="hidden sm:inline cursor-pointer">Upravit</span>
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                onClick={handleDeleteRecipe}
+                                className="flex items-center gap-2 !text-red-600 !border-red-100 hover:!bg-red-50"
+                                disabled={isSubmitting}
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                <span className="hidden sm:inline">Smazat</span>
+                            </Button>
+                        </div>
                     )}
                 </div>
             </header>
