@@ -141,7 +141,7 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
             <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
                 <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <Button variant="secondary" onClick={onBack} className="!p-2">
+                        <Button variant="secondary" onClick={onBack} className="!p-2 cursor-pointer">
                             <ChevronLeft className="w-5 h-5" />
                         </Button>
                         <h1 className="font-bold text-lg text-slate-800 truncate">{recipe.title}</h1>
@@ -150,16 +150,16 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                         <div className="flex items-center gap-2">
                             <Button
                                 onClick={() => setIsEditModalOpen(true)}
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-2 cursor-pointer"
                                 disabled={isSubmitting}
                             >
-                                <Edit className="w-4 h-4" />
-                                <span className="hidden sm:inline cursor-pointer">Upravit</span>
+                                <Edit className="w-4 h-4 " />
+                                <span className="hidden sm:inline">Upravit</span>
                             </Button>
                             <Button
                                 variant="secondary"
                                 onClick={handleDeleteRecipe}
-                                className="flex items-center gap-2 !text-red-600 !border-red-100 hover:!bg-red-50"
+                                className="flex items-center gap-2 !text-red-600 !border-red-100 hover:!bg-red-50 cursor-pointer"
                                 disabled={isSubmitting}
                             >
                                 <Trash2 className="w-4 h-4" />
