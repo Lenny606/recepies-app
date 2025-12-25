@@ -3,12 +3,23 @@ import { LoginPage } from './pages/LoginPage';
 import { LandingPage } from './pages/LandingPage';
 import { PublicRecipesPage } from './pages/PublicRecipesPage';
 import { RecipeDetailPage } from './pages/RecipeDetailPage';
-import { useState } from 'react';
+import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
+
+const RecipeDetailWrapper = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  if (!id) return <Navigate to="/recipes" />;
+
+  return <RecipeDetailPage
+    recipeId={id}
+    onBack={() => navigate('/recipes')}
+  />;
+};
 
 const AppContent = () => {
   const { isAuthenticated, isInitialLoading } = useAuth();
-  const [view, setView] = useState<'home' | 'public' | 'detail'>('home');
-  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   if (isInitialLoading) {
     return (
@@ -21,30 +32,22 @@ const AppContent = () => {
 
   if (!isAuthenticated) return <LoginPage />;
 
-  const handleSelectRecipe = (id: string) => {
-    setSelectedRecipeId(id);
-    setView('detail');
-  };
-
-  if (view === 'home') {
-    return <LandingPage onNavigateToPublic={() => setView('public')} />;
-  }
-
-  if (view === 'public') {
-    return <PublicRecipesPage
-      onBack={() => setView('home')}
-      onSelectRecipe={handleSelectRecipe}
-    />;
-  }
-
-  if (view === 'detail' && selectedRecipeId) {
-    return <RecipeDetailPage
-      recipeId={selectedRecipeId}
-      onBack={() => setView('public')}
-    />;
-  }
-
-  return <LandingPage onNavigateToPublic={() => setView('public')} />;
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage onNavigateToPublic={() => navigate('/recipes')} />} />
+      <Route
+        path="/recipes"
+        element={
+          <PublicRecipesPage
+            onBack={() => navigate('/')}
+            onSelectRecipe={(id) => navigate(`/recipes/${id}`)}
+          />
+        }
+      />
+      <Route path="/recipes/:id" element={<RecipeDetailWrapper />} />
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
 };
 
 function App() {
