@@ -6,6 +6,7 @@ import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 import { Modal } from '../components/ui/Modal';
 import { RecipeForm } from '../components/RecipeForm';
+import { getYouTubeEmbedUrl } from '../utils/videoUtils';
 
 interface Ingredient {
     name: string;
@@ -133,22 +134,6 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const getYouTubeEmbedUrl = (url: string) => {
-        if (!url) return null;
-
-        // Match YouTube video ID
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-
-        const videoId = (match && match[2].length === 11) ? match[2] : null;
-
-        if (videoId) {
-            return `https://www.youtube.com/embed/${videoId}`;
-        }
-
-        return null;
     };
 
     const videoEmbedUrl = recipe.video_url ? getYouTubeEmbedUrl(recipe.video_url) : null;
