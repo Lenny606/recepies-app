@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional
+from pydantic import BaseModel, Field, field_validator
+from typing import List, Optional, Any
 from datetime import datetime
 from enum import Enum
 
@@ -9,8 +9,15 @@ class Visibility(str, Enum):
 
 class Ingredient(BaseModel):
     name: str
-    amount: str
+    amount: Optional[str] = ""
     unit: Optional[str] = None
+
+    @field_validator("amount", mode="before")
+    @classmethod
+    def ensure_string_amount(cls, v: Any) -> str:
+        if v is None:
+            return ""
+        return str(v)
 
 class RecipeBase(BaseModel):
     title: str
