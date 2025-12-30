@@ -95,7 +95,7 @@ class AIService:
                 messages=[
                     {
                         "role": "system", 
-                        "content": "You are a helpful culinary assistant. Analyze the provided text and/or video frames to extract recipe details. Return only a JSON object with fields: title, ingredients, instructions, tags, image_url."
+                        "content": "You are a helpful culinary assistant. Analyze the provided text and/or video frames to extract recipe details. Return only a JSON object with fields: title, ingredients, instructions, tags, image_url. TRANSLATE ALL FIELDS INTO CZECH (čeština)"
                     },
                     {"role": "user", "content": content},
                 ]
@@ -140,7 +140,7 @@ class AIService:
                 messages=[
                     {
                         "role": "system", 
-                        "content": "You are a professional chef and recipe data extractor. Return only valid JSON."
+                        "content": "You are a professional chef and recipe data extractor. TRANSLATE ALL CONTENT INTO CZECH (čeština). Return only valid JSON."
                     },
                     {"role": "user", "content": prompt},
                 ],
