@@ -60,15 +60,28 @@ class ScrapingService:
         """
         Extracts the main text content from the soup object.
         """
-        # Simplistic approach: get text from body or article tags
-        content_areas = soup.find_all(['article', 'main', 'div'], class_=lambda x: x and any(word in x.lower() for word in ['content', 'recipe', 'article', 'post']))
+        # Common recipe site selectors
+        recipe_selectors = [
+            '.recipe-content', '.recipe-container', '.recipe-body',
+            '.wprm-recipe-container', '.tasty-recipes',
+            'article', 'main', '.post-content', '.entry-content'
+        ]
         
-        if content_areas:
-            # Join text from found content areas
-            text = " ".join([area.get_text(separator=' ', strip=True) for area in content_areas])
-        else:
-            # Fallback to body text
-            text = soup.body.get_text(separator=' ', strip=True) if soup.body else ""
-
+        extracted_parts = []
+        
+        # Try specific selectors first
+        for selector in recipe_selectors:
+            elements = soup.select(selector)
+            for element in elements:
+                extracted_parts.append(element.get_text(separator=' ', strip=True))
+        
+        if not extracted_parts:
+            # Fallback: get all text from body
+            if soup.body:
+                extracted_parts.append(soup.body.get_text(separator=' ', strip=True))
+        
+        # Join and clean
+        full_text = " ".join(extracted_parts)
+        
         # Basic cleaning of extra whitespace
-        return " ".join(text.split())
+        return " ".join(full_text.split())

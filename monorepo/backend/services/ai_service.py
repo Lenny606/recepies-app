@@ -9,7 +9,7 @@ from core.config import get_settings
 from domain.recipe import RecipeUpdate, Ingredient
 from repository.recipe_repository import RecipeRepository
 from datetime import datetime
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Any, Optional
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -103,6 +103,59 @@ class AIService:
             return response.choices[0].message.content
         except Exception as e:
             return f"Error communicating with AI: {str(e)}"
+
+    async def analyze_recipe_text(self, text_content: str, url: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Analyzes recipe text content and returns structured JSON.
+        """
+        if not settings.GEMINI_API_KEY:
+            raise Exception("AI feature is not configured. Please add GEMINI_API_KEY to .env")
+
+        prompt = f"""
+        Analyze the following text content extracted from a webpage and identify if it contains a recipe.
+        If it does, extract the recipe details into a structured JSON format.
+        
+        {f'Original URL: {url}' if url else ''}
+        
+        Text Content:
+        {text_content[:8000]}  # Limit content to avoid token issues
+        
+        Return ONLY a JSON object with the following structure:
+        {{
+          "title": "Recipe Name",
+          "description": "Short description of the recipe",
+          "ingredients": [
+            {{"name": "ingredient name", "amount": "quantity", "unit": "unit or null"}}
+          ],
+          "steps": ["Step 1", "Step 2", ...],
+          "tags": ["tag1", "tag2", ...],
+          "web_url": "{url if url else ''}"
+        }}
+        """
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": "You are a professional chef and recipe data extractor. Return only valid JSON."
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                response_format={ "type": "json_object" } if "gemini" not in self.model.lower() else None
+            )
+            
+            ai_response = response.choices[0].message.content
+            
+            # Basic parsing if not using json_object mode
+            json_match = re.search(r"```json\n(.*?)\n```", ai_response, re.DOTALL)
+            json_str = json_match.group(1) if json_match else ai_response
+            
+            return json.loads(json_str)
+        except Exception as e:
+            print(f"Error analyzing recipe text: {e}")
+            raise Exception(f"AI Analysis failed: {str(e)}")
 
     async def analyze_video_and_update_recipe(self, recipe_id: str, video_url: str) -> bool:
         """

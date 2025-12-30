@@ -1,12 +1,21 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from fastapi import HTTPException, status
 from repository.recipe_repository import RecipeRepository
-from domain.recipe import RecipeCreate, RecipeUpdate, RecipeInDB, RecipeResponse, Visibility
+from domain.recipe import RecipeCreate, RecipeUpdate, RecipeInDB, RecipeResponse, Visibility, Ingredient
+from services.scraping_service import ScrapingService
+from services.ai_service import AIService
 
 class RecipeService:
-    def __init__(self, recipe_repo: RecipeRepository):
+    def __init__(
+        self, 
+        recipe_repo: RecipeRepository,
+        scraping_service: Optional[ScrapingService] = None,
+        ai_service: Optional[AIService] = None
+    ):
         self.recipe_repo = recipe_repo
+        self.scraping_service = scraping_service
+        self.ai_service = ai_service
 
     async def create_recipe(self, recipe_in: RecipeCreate, author_id: str) -> RecipeResponse:
         new_recipe = RecipeInDB(
@@ -110,3 +119,60 @@ class RecipeService:
             search_query=search_query
         )
         return [RecipeResponse(**r.model_dump(by_alias=True)) for r in my_recipes]
+
+    async def create_recipe_from_url(self, url: str, author_id: str) -> RecipeResponse:
+        """
+        Scrapes a URL, analyzes it with AI, and creates a recipe.
+        """
+        if not self.scraping_service or not self.ai_service:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Scraping or AI service not configured"
+            )
+
+        # 1. Scrape content
+        try:
+            scraped_data = await self.scraping_service.scrape_url(url)
+            content = scraped_data.get("content", "")
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to scrape URL: {str(e)}"
+            )
+
+        # 2. Analyze with AI
+        try:
+            ai_data = await self.ai_service.analyze_recipe_text(content, url)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"AI analysis failed: {str(e)}"
+            )
+
+        # 3. Create recipe entity
+        try:
+            # Map ingredients from AI response to Ingredient domain model
+            ingredients = []
+            for ing in ai_data.get("ingredients", []):
+                ingredients.append(Ingredient(
+                    name=ing.get("name", ""),
+                    amount=ing.get("amount", ""),
+                    unit=ing.get("unit")
+                ))
+
+            recipe_create = RecipeCreate(
+                title=ai_data.get("title", "Imported Recipe"),
+                description=ai_data.get("description"),
+                steps=ai_data.get("steps", []),
+                ingredients=ingredients,
+                tags=ai_data.get("tags", []),
+                web_url=url,
+                visibility=Visibility.PUBLIC # Default to public for imported ones? or private?
+            )
+            
+            return await self.create_recipe(recipe_create, author_id)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to save imported recipe: {str(e)}"
+            )

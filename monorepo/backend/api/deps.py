@@ -7,6 +7,9 @@ from core.database import get_database
 from repository.user_repository import UserRepository
 from repository.recipe_repository import RecipeRepository
 from domain.user import UserInDB
+from services.recipe_service import RecipeService
+from services.scraping_service import ScrapingService
+from services.ai_service import AIService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
@@ -88,3 +91,17 @@ async def get_current_user_from_refresh_token(
     if user is None:
         raise credentials_exception
     return user
+
+async def get_scraping_service() -> ScrapingService:
+    return ScrapingService()
+
+async def get_ai_service(db = Depends(get_database)) -> AIService:
+    repo = RecipeRepository(db)
+    return AIService(recipe_repo=repo)
+
+async def get_recipe_service(
+    recipe_repo: RecipeRepository = Depends(get_recipe_repo),
+    scraping_service: ScrapingService = Depends(get_scraping_service),
+    ai_service: AIService = Depends(get_ai_service)
+) -> RecipeService:
+    return RecipeService(recipe_repo, scraping_service, ai_service)
