@@ -18,8 +18,14 @@ class RecipeService:
         self.ai_service = ai_service
 
     async def create_recipe(self, recipe_in: RecipeCreate, author_id: str) -> RecipeResponse:
+        # If should_scrape is True and web_url is provided, use the scraping flow
+        if recipe_in.should_scrape and recipe_in.web_url:
+            # We reuse the logic from create_recipe_from_url but with potentially partial data
+            # Actually, let's just use create_recipe_from_url if that's the intention
+            return await self.create_recipe_from_url(recipe_in.web_url, author_id)
+
         new_recipe = RecipeInDB(
-            **recipe_in.model_dump(),
+            **recipe_in.model_dump(exclude={"should_scrape"}),
             author_id=author_id
         )
         created_recipe = await self.recipe_repo.create(new_recipe)

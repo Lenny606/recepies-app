@@ -24,7 +24,7 @@ class RecipeBase(BaseModel):
     web_url: Optional[str] = None
 
 class RecipeCreate(RecipeBase):
-    pass
+    should_scrape: Optional[bool] = False
 
 class RecipeUpdate(BaseModel):
     title: Optional[str] = None

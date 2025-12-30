@@ -74,6 +74,49 @@ async def test_create_recipe_from_url_success(recipe_service, mock_scraping_serv
     assert mock_recipe_repo.create.called
 
 @pytest.mark.asyncio
+async def test_create_recipe_with_should_scrape_flag(recipe_service, mock_scraping_service, mock_ai_service, mock_recipe_repo):
+    from domain.recipe import RecipeCreate
+    url = "https://example.com/pasta"
+    author_id = "user123"
+    
+    recipe_in = RecipeCreate(
+        title="", # Title can be empty when scraping
+        web_url=url,
+        should_scrape=True
+    )
+    
+    # Mock Scraping and AI
+    mock_scraping_service.scrape_url.return_value = {"content": "..."}
+    mock_ai_service.analyze_recipe_text.return_value = {
+        "title": "Tomato Pasta",
+        "ingredients": [],
+        "steps": [],
+        "tags": []
+    }
+    
+    # Mock Repo
+    mock_recipe_repo.create.return_value = MagicMock(
+        model_dump=lambda by_alias=False: {
+            "_id": "recipe123",
+            "title": "Tomato Pasta",
+            "author_id": author_id,
+            "ingredients": [],
+            "steps": [],
+            "tags": [],
+            "visibility": "public",
+            "web_url": url,
+            "created_at": "2023-01-01T00:00:00",
+            "updated_at": "2023-01-01T00:00:00"
+        }
+    )
+    
+    result = await recipe_service.create_recipe(recipe_in, author_id)
+    
+    assert result.title == "Tomato Pasta"
+    assert mock_scraping_service.scrape_url.called
+    assert mock_ai_service.analyze_recipe_text.called
+
+@pytest.mark.asyncio
 async def test_create_recipe_from_url_scraping_failure(recipe_service, mock_scraping_service):
     url = "https://invalid-url.com"
     mock_scraping_service.scrape_url.side_effect = Exception("Scraping failed")

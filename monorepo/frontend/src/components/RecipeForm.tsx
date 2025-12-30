@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
-import { Plus, Trash2, Video } from 'lucide-react';
+import { Plus, Trash2, Video, Wand2 } from 'lucide-react';
 
 interface Ingredient {
     name: string;
@@ -55,19 +55,20 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
         setIngredients(newIngredients);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent, shouldScrape = false) => {
         e.preventDefault();
-        if (!title.trim()) return;
+        if (!shouldScrape && !title.trim()) return;
 
         const recipeData = {
-            title,
+            title: title || (shouldScrape ? 'Imported Recipe' : ''),
             description,
             video_url: videoUrl,
             web_url: webUrl,
             steps: steps.filter(s => s.trim() !== ''),
             ingredients: ingredients.filter(i => i.name.trim() !== ''),
             tags: tags.split(',').map(t => t.trim()).filter(t => t !== ''),
-            visibility
+            visibility,
+            should_scrape: shouldScrape
         };
 
         await onSubmit(recipeData);
@@ -111,11 +112,30 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
                     <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2">
                         Webová stránka
                     </label>
-                    <Input
-                        value={webUrl}
-                        onChange={(e) => setWebUrl(e.target.value)}
-                        placeholder="https://example.com/recept"
-                    />
+                    <div className="flex gap-2">
+                        <Input
+                            className="flex-1"
+                            value={webUrl}
+                            onChange={(e) => setWebUrl(e.target.value)}
+                            placeholder="https://example.com/recept"
+                        />
+                        {webUrl && !initialData && (
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={(e) => handleSubmit(e, true)}
+                                className="whitespace-nowrap flex items-center gap-2 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                disabled={isSubmitting}
+                            >
+                                <Wand2 className="w-4 h-4" /> Vytvořit z webu
+                            </Button>
+                        )}
+                    </div>
+                    {webUrl && !initialData && (
+                        <p className="mt-1 text-xs text-slate-500">
+                            AI automaticky načte ingredience a postup z uvedené stránky.
+                        </p>
+                    )}
                 </div>
 
                 <div className="space-y-3">
