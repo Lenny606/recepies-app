@@ -114,7 +114,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic }) 
                         Zatím zde nejsou žádné recepty. Začněte přidáním svého prvního kulinářského díla nebo se zeptejte AI na inspiraci.
                     </p>
                     <Button variant="outline" onClick={onNavigateToPublic}>
-                        Procházet veřejné recepty
+                        Procházet recepty
                     </Button>
                 </div>
 
