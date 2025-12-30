@@ -12,3 +12,5 @@ slowapi>=0.1.9
 openai>=1.0.0
 yt-dlp
 opencv-python-headless
+httpx>=0.26.0
+beautifulsoup4>=4.12.0
