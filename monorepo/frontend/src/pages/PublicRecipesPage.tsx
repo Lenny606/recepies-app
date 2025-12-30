@@ -18,6 +18,7 @@ interface Recipe {
     tags: string[];
     created_at: string;
     video_url?: string;
+    web_url?: string;
 }
 
 interface PublicRecipesPageProps {

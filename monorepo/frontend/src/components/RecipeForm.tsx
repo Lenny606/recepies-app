@@ -15,6 +15,7 @@ interface Recipe {
     title: string;
     description?: string;
     video_url?: string;
+    web_url?: string;
     steps: string[];
     ingredients: Ingredient[];
     tags: string[];
@@ -32,6 +33,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
     const [title, setTitle] = useState(initialData?.title || '');
     const [description, setDescription] = useState(initialData?.description || '');
     const [videoUrl, setVideoUrl] = useState(initialData?.video_url || '');
+    const [webUrl, setWebUrl] = useState(initialData?.web_url || '');
     const [steps, setSteps] = useState<string[]>(initialData?.steps || ['']);
     const [ingredients, setIngredients] = useState<Ingredient[]>(initialData?.ingredients || [{ name: '', amount: '', unit: '' }]);
     const [tags, setTags] = useState(initialData?.tags?.join(', ') || '');
@@ -61,6 +63,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
             title,
             description,
             video_url: videoUrl,
+            web_url: webUrl,
             steps: steps.filter(s => s.trim() !== ''),
             ingredients: ingredients.filter(i => i.name.trim() !== ''),
             tags: tags.split(',').map(t => t.trim()).filter(t => t !== ''),
@@ -101,6 +104,17 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
                         value={videoUrl}
                         onChange={(e) => setVideoUrl(e.target.value)}
                         placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2">
+                        Webová stránka
+                    </label>
+                    <Input
+                        value={webUrl}
+                        onChange={(e) => setWebUrl(e.target.value)}
+                        placeholder="https://example.com/recept"
                     />
                 </div>
 

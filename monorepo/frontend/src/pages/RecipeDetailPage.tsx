@@ -25,6 +25,7 @@ interface Recipe {
     author_id: string;
     created_at: string;
     video_url?: string;
+    web_url?: string;
     visibility: string;
 }
 
@@ -265,7 +266,18 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                                 className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
                             >
                                 <Video className="w-5 h-5" />
-                                <span>Otevřít původní video</span>
+                                <span>Původní video</span>
+                            </a>
+                        )}
+                        {recipe.web_url && (
+                            <a
+                                href={recipe.web_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                            >
+                                <Sparkles className="w-5 h-5 text-emerald-500" />
+                                <span>Původní recept (WEB)</span>
                             </a>
                         )}
                     </div>
