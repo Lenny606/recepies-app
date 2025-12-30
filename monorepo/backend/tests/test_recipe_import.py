@@ -30,7 +30,8 @@ async def test_create_recipe_from_url_success(recipe_service, mock_scraping_serv
     
     # Mock Scraping
     mock_scraping_service.scrape_url.return_value = {
-        "content": "Make pasta with tomato and basil."
+        "content": "Make pasta with tomato and basil.",
+        "image_url": "https://example.com/pasta.jpg"
     }
     
     # Mock AI Analysis
@@ -42,7 +43,8 @@ async def test_create_recipe_from_url_success(recipe_service, mock_scraping_serv
             {"name": "Tomato", "amount": "2", "unit": "pcs"}
         ],
         "steps": ["Boil pasta", "Add tomato"],
-        "tags": ["pasta", "easy"]
+        "tags": ["pasta", "easy"],
+        "image_url": "https://example.com/pasta_ai.jpg" # AI might find a better one
     }
     
     # Mock Repo Create
@@ -59,6 +61,7 @@ async def test_create_recipe_from_url_success(recipe_service, mock_scraping_serv
             "tags": ["pasta", "easy"],
             "visibility": "public",
             "web_url": url,
+            "image_url": "https://example.com/pasta_ai.jpg",
             "created_at": "2023-01-01T00:00:00",
             "updated_at": "2023-01-01T00:00:00"
         }
@@ -67,6 +70,7 @@ async def test_create_recipe_from_url_success(recipe_service, mock_scraping_serv
     result = await recipe_service.create_recipe_from_url(url, author_id)
     
     assert result.title == "Tomato Pasta"
+    assert result.image_url == "https://example.com/pasta_ai.jpg"
     assert len(result.ingredients) == 2
     assert result.web_url == url
     assert mock_scraping_service.scrape_url.called
@@ -115,6 +119,44 @@ async def test_create_recipe_with_should_scrape_flag(recipe_service, mock_scrapi
     assert result.title == "Tomato Pasta"
     assert mock_scraping_service.scrape_url.called
     assert mock_ai_service.analyze_recipe_text.called
+
+@pytest.mark.asyncio
+async def test_create_recipe_from_url_image_fallback(recipe_service, mock_scraping_service, mock_ai_service, mock_recipe_repo):
+    url = "https://example.com/pasta"
+    author_id = "user123"
+    
+    # Mock Scraper returns image, but AI does NOT
+    mock_scraping_service.scrape_url.return_value = {
+        "content": "...",
+        "image_url": "https://example.com/fallback.jpg"
+    }
+    mock_ai_service.analyze_recipe_text.return_value = {
+        "title": "Pasta",
+        "ingredients": [],
+        "steps": [],
+        "tags": []
+    }
+    
+    # Mock Repo
+    mock_recipe_repo.create.return_value = MagicMock(
+        model_dump=lambda by_alias=False: {
+            "_id": "recipe123",
+            "title": "Pasta",
+            "author_id": author_id,
+            "ingredients": [],
+            "steps": [],
+            "tags": [],
+            "visibility": "public",
+            "web_url": url,
+            "image_url": "https://example.com/fallback.jpg", # Should use fallback
+            "created_at": "2023-01-01T00:00:00",
+            "updated_at": "2023-01-01T00:00:00"
+        }
+    )
+    
+    result = await recipe_service.create_recipe_from_url(url, author_id)
+    
+    assert result.image_url == "https://example.com/fallback.jpg"
 
 @pytest.mark.asyncio
 async def test_create_recipe_from_url_scraping_failure(recipe_service, mock_scraping_service):

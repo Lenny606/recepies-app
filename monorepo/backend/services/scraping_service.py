@@ -46,15 +46,59 @@ class ScrapingService:
         title = soup.title.string.strip() if soup.title else ""
         
         # Basic extraction of main content
-        # This can be improved with site-specific selectors or common patterns
         main_content = self._extract_main_text(soup)
+        
+        # Extraction of main image URL
+        main_image = self._extract_main_image(soup)
 
         return {
             "url": url,
             "title": title,
             "content": main_content,
+            "image_url": main_image,
             "raw_html": html_content if len(html_content) < 50000 else "Content too large"
         }
+
+    def _extract_main_image(self, soup: BeautifulSoup) -> Optional[str]:
+        """
+        Tries to extract the main image URL from the page.
+        """
+        # 1. Look for OpenGraph image
+        og_image = soup.find("meta", property="og:image")
+        if og_image and og_image.get("content"):
+            return og_image.get("content")
+
+        # 2. Look for Twitter card image
+        twitter_image = soup.find("meta", name="twitter:image")
+        if twitter_image and twitter_image.get("content"):
+            return twitter_image.get("content")
+
+        # 3. Look for schema.org image
+        import json
+        json_ld = soup.find_all("script", type="application/ld+json")
+        for ld in json_ld:
+            try:
+                data = json.loads(ld.string)
+                if isinstance(data, dict):
+                    if data.get("@type") == "Recipe" and data.get("image"):
+                        img = data.get("image")
+                        if isinstance(img, list): return img[0]
+                        if isinstance(img, dict): return img.get("url")
+                        return img
+            except:
+                continue
+
+        # 4. Fallback: first large-ish image in the content area
+        # This is a bit risky but better than nothing
+        for img in soup.find_all("img"):
+            src = img.get("src")
+            if src and (src.startswith("http") or src.startswith("//")):
+                # Basic filter for non-icon images
+                alt = img.get("alt", "")
+                if len(alt) > 5:
+                    return src
+
+        return None
 
     def _extract_main_text(self, soup: BeautifulSoup) -> str:
         """

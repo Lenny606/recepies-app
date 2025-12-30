@@ -173,6 +173,7 @@ class RecipeService:
                 ingredients=ingredients,
                 tags=ai_data.get("tags", []),
                 web_url=url,
+                image_url=ai_data.get("image_url") or scraped_data.get("image_url"),
                 visibility=Visibility.PUBLIC # Default to public for imported ones? or private?
             )
             

@@ -129,6 +129,7 @@ class AIService:
           ],
           "steps": ["Step 1", "Step 2", ...],
           "tags": ["tag1", "tag2", ...],
+          "image_url": "URL to the recipe image if found",
           "web_url": "{url if url else ''}"
         }}
         """
