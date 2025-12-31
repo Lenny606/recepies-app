@@ -88,6 +88,8 @@ async def read_public_recipes(
     limit: int = 100,
     search: Optional[str] = None,
     tags: Optional[List[str]] = Query(None),
+    current_user: Optional[UserInDB] = Depends(get_current_user_optional),
     service: RecipeService = Depends(get_recipe_service)
 ):
-    return await service.list_recipes(None, skip, limit, search, tags)
+    user_id = current_user.id if current_user else None
+    return await service.list_recipes(user_id, skip, limit, search, tags)

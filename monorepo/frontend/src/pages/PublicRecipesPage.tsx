@@ -42,7 +42,7 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
             const url = new URL(`${API_BASE_URL}/api/v1/recipes/`);
             if (searchTerm) url.searchParams.append('search', searchTerm);
 
-            const response = await fetch(url.toString());
+            const response = await authenticatedFetch(url.toString());
             if (!response.ok) throw new Error('Nepodařilo se načíst recepty');
 
             const data = await response.json();
@@ -88,7 +88,11 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
             }
 
             const updatedRecipe = await response.json();
-            setRecipes(recipes.map(r => (r.id === updatedRecipe.id || r._id === updatedRecipe._id) ? updatedRecipe : r));
+            setRecipes(recipes.map(r => {
+                const rId = r.id || r._id;
+                const updatedId = updatedRecipe.id || updatedRecipe._id;
+                return (rId && rId === updatedId) ? updatedRecipe : r;
+            }));
             setEditingRecipe(null);
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Nastala chyba při aktualizaci receptu');
@@ -112,7 +116,11 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
             if (!response.ok) throw new Error('Nepodařilo se změnit stav oblíbených');
 
             const updatedRecipe = await response.json();
-            setRecipes(recipes.map(r => (r.id === updatedRecipe.id || r._id === updatedRecipe._id) ? { ...r, is_favorite: updatedRecipe.is_favorite } : r));
+            setRecipes(recipes.map(r => {
+                const rId = r.id || r._id;
+                const updatedId = updatedRecipe.id || updatedRecipe._id;
+                return (rId && rId === updatedId) ? { ...r, is_favorite: updatedRecipe.is_favorite } : r;
+            }));
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Nastala chyba');
         }
