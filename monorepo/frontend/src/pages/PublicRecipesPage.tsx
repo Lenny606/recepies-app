@@ -108,7 +108,7 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                     </Button>
                     <div className="flex items-center gap-2 font-bold text-xl text-slate-800">
                         <span className="text-2xl">🌍</span>
-                        <span>Veřejné recepty</span>
+                        <span>Recepty</span>
                     </div>
                 </div>
             </header>

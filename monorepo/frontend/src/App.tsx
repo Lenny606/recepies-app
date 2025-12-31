@@ -34,7 +34,10 @@ const AppContent = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<LandingPage onNavigateToPublic={() => navigate('/recipes')} />} />
+      <Route path="/" element={<LandingPage
+        onNavigateToPublic={() => navigate('/recipes')}
+        onSelectRecipe={(id) => navigate(`/recipes/${id}`)}
+      />} />
       <Route
         path="/recipes"
         element={
