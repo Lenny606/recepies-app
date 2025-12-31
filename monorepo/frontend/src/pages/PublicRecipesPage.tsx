@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { ChevronLeft, Search, User, Edit } from 'lucide-react';
+import { ChevronLeft, Search, User, Edit, Heart } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 import { Modal } from '../components/ui/Modal';
@@ -19,6 +19,7 @@ interface Recipe {
     created_at: string;
     video_url?: string;
     web_url?: string;
+    is_favorite?: boolean;
 }
 
 interface PublicRecipesPageProps {
@@ -96,6 +97,27 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
         }
     };
 
+    const handleToggleFavorite = async (e: React.MouseEvent, recipeId: string) => {
+        e.stopPropagation();
+        if (!user) {
+            alert('Pro hodnocení receptů se musíte přihlásit');
+            return;
+        }
+
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}/favorite`, {
+                method: 'POST'
+            });
+
+            if (!response.ok) throw new Error('Nepodařilo se změnit stav oblíbených');
+
+            const updatedRecipe = await response.json();
+            setRecipes(recipes.map(r => (r.id === updatedRecipe.id || r._id === updatedRecipe._id) ? { ...r, is_favorite: updatedRecipe.is_favorite } : r));
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Nastala chyba');
+        }
+    };
+
 
 
     return (
@@ -165,6 +187,17 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                                             />
                                         ) : (
                                             <span>🥘</span>
+                                        )}
+                                        {user && (
+                                            <button
+                                                onClick={(e) => handleToggleFavorite(e, (recipe.id || recipe._id)!)}
+                                                className={`absolute top-2 right-2 p-2 rounded-full shadow-sm transition-all z-20 ${recipe.is_favorite
+                                                    ? 'bg-rose-50 text-rose-500 hover:bg-rose-100'
+                                                    : 'bg-white/80 text-slate-400 hover:bg-white hover:text-rose-400'
+                                                    }`}
+                                            >
+                                                <Heart className={`w-5 h-5 ${recipe.is_favorite ? 'fill-current' : ''}`} />
+                                            </button>
                                         )}
                                     </div>
                                     <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-emerald-700 transition-colors">

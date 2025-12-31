@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit, Utensils, Trash2, Sparkles } from 'lucide-react';
+import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit, Utensils, Trash2, Sparkles, Heart } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 import { Modal } from '../components/ui/Modal';
@@ -27,6 +27,7 @@ interface Recipe {
     video_url?: string;
     web_url?: string;
     visibility: string;
+    is_favorite?: boolean;
 }
 
 interface RecipeDetailPageProps {
@@ -142,6 +143,26 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
         }
     };
 
+    const handleToggleFavorite = async () => {
+        if (!user) {
+            alert('Pro hodnocení receptů se musíte přihlásit');
+            return;
+        }
+
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/${recipeId}/favorite`, {
+                method: 'POST'
+            });
+
+            if (!response.ok) throw new Error('Nepodařilo se změnit stav oblíbených');
+
+            const updatedRecipe = await response.json();
+            setRecipe(prev => prev ? { ...prev, is_favorite: updatedRecipe.is_favorite } : null);
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Nastala chyba');
+        }
+    };
+
     const handleDeleteRecipe = async () => {
         if (!window.confirm('Opravdu chcete tento recept smazat? Tato akce je nevratná.')) {
             return;
@@ -185,38 +206,49 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                         </Button>
                         <h1 className="font-bold text-lg text-slate-800 truncate">{recipe.title}</h1>
                     </div>
-                    {user && user.id && recipe.author_id && String(recipe.author_id) === String(user.id) && (
-                        <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                        {user && (
                             <Button
-                                onClick={handleAIAnalyze}
-                                disabled={isAnalyzing || !recipe.video_url}
-                                className={`flex items-center gap-2 cursor-pointer ${isAnalyzing ? 'animate-pulse' : ''
-                                    } !bg-indigo-600 hover:!bg-indigo-700 !text-white`}
-                            >
-                                <Sparkles className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
-                                <span className="hidden sm:inline">
-                                    {isAnalyzing ? 'Analyzuji...' : 'AI Analyzovat'}
-                                </span>
-                            </Button>
-                            <Button
-                                onClick={() => setIsEditModalOpen(true)}
-                                className="flex items-center gap-2 cursor-pointer"
-                                disabled={isSubmitting || isAnalyzing}
-                            >
-                                <Edit className="w-4 h-4 " />
-                                <span className="hidden sm:inline">Upravit</span>
-                            </Button>
-                            <Button
+                                onClick={handleToggleFavorite}
                                 variant="secondary"
-                                onClick={handleDeleteRecipe}
-                                className="flex items-center gap-2 !text-red-600 !border-red-100 hover:!bg-red-50 cursor-pointer"
-                                disabled={isSubmitting || isAnalyzing}
+                                className={`!p-2 cursor-pointer ${recipe.is_favorite ? 'text-rose-500 bg-rose-50 border-rose-100 hover:bg-rose-100' : ''}`}
                             >
-                                <Trash2 className="w-4 h-4" />
-                                <span className="hidden sm:inline">Smazat</span>
+                                <Heart className={`w-5 h-5 ${recipe.is_favorite ? 'fill-current' : ''}`} />
                             </Button>
-                        </div>
-                    )}
+                        )}
+                        {user && user.id && recipe.author_id && String(recipe.author_id) === String(user.id) && (
+                            <>
+                                <Button
+                                    onClick={handleAIAnalyze}
+                                    disabled={isAnalyzing || !recipe.video_url}
+                                    className={`flex items-center gap-2 cursor-pointer ${isAnalyzing ? 'animate-pulse' : ''
+                                        } !bg-indigo-600 hover:!bg-indigo-700 !text-white`}
+                                >
+                                    <Sparkles className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
+                                    <span className="hidden sm:inline">
+                                        {isAnalyzing ? 'Analyzuji...' : 'AI Analyzovat'}
+                                    </span>
+                                </Button>
+                                <Button
+                                    onClick={() => setIsEditModalOpen(true)}
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    disabled={isSubmitting || isAnalyzing}
+                                >
+                                    <Edit className="w-4 h-4 " />
+                                    <span className="hidden sm:inline">Upravit</span>
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    onClick={handleDeleteRecipe}
+                                    className="flex items-center gap-2 !text-red-600 !border-red-100 hover:!bg-red-50 cursor-pointer"
+                                    disabled={isSubmitting || isAnalyzing}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Smazat</span>
+                                </Button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </header>
 
