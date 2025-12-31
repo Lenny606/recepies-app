@@ -158,6 +158,10 @@ class RecipeService:
         )
         return [self._prepare_recipe_response(r, current_user_id) for r in favorite_recipes]
 
+    async def get_random_recipes(self, limit: int = 5, current_user_id: Optional[str] = None) -> List[RecipeResponse]:
+        random_recipes = await self.recipe_repo.get_random(limit=limit)
+        return [self._prepare_recipe_response(r, current_user_id) for r in random_recipes]
+
     async def create_recipe_from_url(self, url: str, author_id: str) -> RecipeResponse:
         """
         Scrapes a URL, analyzes it with AI, and creates a recipe.

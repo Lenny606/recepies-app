@@ -8,6 +8,7 @@ import { API_BASE_URL } from '../config';
 import { Modal } from '../components/ui/Modal';
 import { RecipeForm } from '../components/RecipeForm';
 import { getYouTubeThumbnailUrl } from '../utils/videoUtils';
+import { Carousel } from '../components/Carousel';
 
 interface Recipe {
     _id?: string;
@@ -19,6 +20,7 @@ interface Recipe {
     created_at: string;
     video_url?: string;
     web_url?: string;
+    image_url?: string;
 }
 
 interface LandingPageProps {
@@ -31,6 +33,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
+    const [randomRecipes, setRandomRecipes] = useState<Recipe[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -68,9 +71,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
         }
     };
 
+    const fetchRandomRecipes = async () => {
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/random?limit=5`);
+            if (response.ok) {
+                const data = await response.json();
+                setRandomRecipes(data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch random recipes:', err);
+        }
+    };
+
     useEffect(() => {
         fetchMyRecipes();
         fetchFavoriteRecipes();
+        fetchRandomRecipes();
     }, []);
 
     const handleSearch = (e: React.FormEvent) => {
@@ -181,6 +197,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
             </Modal>
 
             <main className="max-w-7xl mx-auto px-4 py-8">
+
+                {/* Random Recipes Carousel */}
+                {randomRecipes.length > 0 && (
+                    <div className="mb-12">
+                        <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                            <Sparkles className="w-6 h-6 text-emerald-500" />
+                            Dnešní inspirace
+                        </h2>
+                        <Carousel recipes={randomRecipes} onSelectRecipe={onSelectRecipe} />
+                    </div>
+                )}
 
                 {/* Helper Actions */}
                 <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 mb-8">

@@ -93,3 +93,12 @@ async def read_public_recipes(
 ):
     user_id = current_user.id if current_user else None
     return await service.list_recipes(user_id, skip, limit, search, tags)
+
+@router.get("/random", response_model=List[RecipeResponse])
+async def read_random_recipes(
+    limit: int = 5,
+    current_user: Optional[UserInDB] = Depends(get_current_user_optional),
+    service: RecipeService = Depends(get_recipe_service)
+):
+    user_id = current_user.id if current_user else None
+    return await service.get_random_recipes(limit, user_id)

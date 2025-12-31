@@ -113,3 +113,15 @@ class RecipeRepository:
             doc["_id"] = str(doc["_id"])
             recipes.append(RecipeInDB(**doc))
         return recipes
+
+    async def get_random(self, limit: int = 5) -> List[RecipeInDB]:
+        pipeline = [
+            {"$match": {"visibility": "public"}},
+            {"$sample": {"size": limit}}
+        ]
+        
+        recipes = []
+        async for doc in self.collection.aggregate(pipeline):
+            doc["_id"] = str(doc["_id"])
+            recipes.append(RecipeInDB(**doc))
+        return recipes
