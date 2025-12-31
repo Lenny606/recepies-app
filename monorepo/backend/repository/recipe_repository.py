@@ -39,6 +39,30 @@ class RecipeRepository:
         )
         return result.modified_count > 0
 
+    async def toggle_favorite(self, recipe_id: str, user_id: str) -> bool:
+        try:
+            oid = ObjectId(recipe_id)
+        except:
+            return False
+
+        # Check if user already favorited
+        recipe = await self.collection.find_one({"_id": oid, "favorite_by": user_id})
+        
+        if recipe:
+            # Remove from favorites
+            result = await self.collection.update_one(
+                {"_id": oid},
+                {"$pull": {"favorite_by": user_id}}
+            )
+        else:
+            # Add to favorites
+            result = await self.collection.update_one(
+                {"_id": oid},
+                {"$addToSet": {"favorite_by": user_id}}
+            )
+        
+        return result.modified_count > 0
+
     async def delete(self, recipe_id: str) -> bool:
         try:
             oid = ObjectId(recipe_id)

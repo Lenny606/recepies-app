@@ -47,6 +47,7 @@ class RecipeUpdate(BaseModel):
 class RecipeInDB(RecipeBase):
     id: Optional[str] = Field(None, alias="_id")
     author_id: str
+    favorite_by: List[str] = []
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -54,4 +55,4 @@ class RecipeInDB(RecipeBase):
         populate_by_name = True
 
 class RecipeResponse(RecipeInDB):
-    pass
+    is_favorite: bool = False

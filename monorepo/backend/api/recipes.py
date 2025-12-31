@@ -65,6 +65,14 @@ async def delete_recipe(
 ):
     await service.delete_recipe(recipe_id, current_user.id)
 
+@router.post("/{recipe_id}/favorite", response_model=RecipeResponse)
+async def toggle_favorite(
+    recipe_id: str,
+    current_user: UserInDB = Depends(get_current_user),
+    service: RecipeService = Depends(get_recipe_service)
+):
+    return await service.toggle_favorite(recipe_id, current_user.id)
+
 @router.get("/", response_model=List[RecipeResponse])
 async def read_public_recipes(
     skip: int = 0,

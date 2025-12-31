@@ -29,7 +29,13 @@ class RecipeService:
             author_id=author_id
         )
         created_recipe = await self.recipe_repo.create(new_recipe)
-        return RecipeResponse(**created_recipe.model_dump(by_alias=True))
+        return self._prepare_recipe_response(created_recipe, author_id)
+
+    def _prepare_recipe_response(self, recipe: RecipeInDB, current_user_id: Optional[str]) -> RecipeResponse:
+        response = RecipeResponse(**recipe.model_dump(by_alias=True))
+        if current_user_id and hasattr(recipe, 'favorite_by'):
+            response.is_favorite = current_user_id in recipe.favorite_by
+        return response
 
     async def get_recipe(self, recipe_id: str, current_user_id: Optional[str] = None) -> RecipeResponse:
         recipe = await self.recipe_repo.get_by_id(recipe_id)
@@ -40,7 +46,7 @@ class RecipeService:
         if recipe.visibility == Visibility.PRIVATE and recipe.author_id != current_user_id:
             raise HTTPException(status_code=403, detail="Not authorized to view this recipe")
             
-        return RecipeResponse(**recipe.model_dump(by_alias=True))
+        return self._prepare_recipe_response(recipe, current_user_id)
 
     async def update_recipe(self, recipe_id: str, update_in: RecipeUpdate, current_user_id: str) -> RecipeResponse:
         recipe = await self.recipe_repo.get_by_id(recipe_id)
@@ -58,7 +64,21 @@ class RecipeService:
         await self.recipe_repo.update(recipe_id, update_data)
         
         updated_recipe = await self.recipe_repo.get_by_id(recipe_id)
-        return RecipeResponse(**updated_recipe.model_dump(by_alias=True))
+        return self._prepare_recipe_response(updated_recipe, current_user_id)
+
+    async def toggle_favorite(self, recipe_id: str, current_user_id: str) -> RecipeResponse:
+        recipe = await self.recipe_repo.get_by_id(recipe_id)
+        if not recipe:
+            raise HTTPException(status_code=404, detail="Recipe not found")
+        
+        # Check if user can see it
+        if recipe.visibility == Visibility.PRIVATE and recipe.author_id != current_user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to view this recipe")
+
+        await self.recipe_repo.toggle_favorite(recipe_id, current_user_id)
+        
+        updated_recipe = await self.recipe_repo.get_by_id(recipe_id)
+        return self._prepare_recipe_response(updated_recipe, current_user_id)
 
     async def delete_recipe(self, recipe_id: str, current_user_id: str) -> bool:
         recipe = await self.recipe_repo.get_by_id(recipe_id)
@@ -108,7 +128,7 @@ class RecipeService:
             tags=tags
         )
         
-        return [RecipeResponse(**r.model_dump(by_alias=True)) for r in public_recipes]
+        return [self._prepare_recipe_response(r, current_user_id) for r in public_recipes]
 
     async def list_my_recipes(
         self,
@@ -120,11 +140,9 @@ class RecipeService:
         my_recipes = await self.recipe_repo.get_all(
             skip=skip,
             limit=limit,
-            author_id=current_user_id,
-            public_only=False, # Show my private ones too
             search_query=search_query
         )
-        return [RecipeResponse(**r.model_dump(by_alias=True)) for r in my_recipes]
+        return [self._prepare_recipe_response(r, current_user_id) for r in my_recipes]
 
     async def create_recipe_from_url(self, url: str, author_id: str) -> RecipeResponse:
         """
