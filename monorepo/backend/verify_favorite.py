@@ -7,7 +7,10 @@ from datetime import datetime
 
 async def verify_favorite_feature():
     # Setup
-    mongo_url = os.getenv("MONGO_DB_URL", "mongodb+srv://db_user:AqybM6waTChDdWJM@cluster0.fg3jc65.mongodb.net/?appName=Cluster0")
+    mongo_url = os.getenv("MONGO_DB_URL")
+    if not mongo_url:
+        print("Error: MONGO_DB_URL environment variable not set")
+        return
     client = AsyncIOMotorClient(mongo_url)
     db = client.recipe_app_test  # Use a test DB
     repo = RecipeRepository(db)
