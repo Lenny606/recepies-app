@@ -39,6 +39,15 @@ async def read_my_recipes(
 ):
     return await service.list_my_recipes(current_user.id, skip, limit, search)
 
+@router.get("/favorites", response_model=List[RecipeResponse])
+async def read_favorite_recipes(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: UserInDB = Depends(get_current_user),
+    service: RecipeService = Depends(get_recipe_service)
+):
+    return await service.list_favorite_recipes(current_user.id, skip, limit)
+
 @router.get("/{recipe_id}", response_model=RecipeResponse)
 async def read_recipe(
     recipe_id: str,

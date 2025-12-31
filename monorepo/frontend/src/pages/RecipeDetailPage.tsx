@@ -211,9 +211,9 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                             <Button
                                 onClick={handleToggleFavorite}
                                 variant="secondary"
-                                className={`!p-2 cursor-pointer ${recipe.is_favorite ? 'text-rose-500 bg-rose-50 border-rose-100 hover:bg-rose-100' : ''}`}
+                                className={`!p-2 cursor-pointer ${recipe.is_favorite ? 'bg-rose-50 border-rose-100 hover:bg-rose-100' : ''}`}
                             >
-                                <Heart className={`w-5 h-5 ${recipe.is_favorite ? 'fill-current' : ''}`} />
+                                <Heart className={`w-5 h-5 text-rose-500 ${recipe.is_favorite ? 'fill-current' : ''}`} />
                             </Button>
                         )}
                         {user && user.id && recipe.author_id && String(recipe.author_id) === String(user.id) && (

@@ -140,9 +140,23 @@ class RecipeService:
         my_recipes = await self.recipe_repo.get_all(
             skip=skip,
             limit=limit,
+            author_id=current_user_id,
             search_query=search_query
         )
         return [self._prepare_recipe_response(r, current_user_id) for r in my_recipes]
+
+    async def list_favorite_recipes(
+        self,
+        current_user_id: str,
+        skip: int = 0,
+        limit: int = 100
+    ) -> List[RecipeResponse]:
+        favorite_recipes = await self.recipe_repo.get_all(
+            skip=skip,
+            limit=limit,
+            favorited_by_user_id=current_user_id
+        )
+        return [self._prepare_recipe_response(r, current_user_id) for r in favorite_recipes]
 
     async def create_recipe_from_url(self, url: str, author_id: str) -> RecipeResponse:
         """

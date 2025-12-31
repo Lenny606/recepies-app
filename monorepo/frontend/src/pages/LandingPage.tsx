@@ -30,6 +30,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
     const { user, logout, authenticatedFetch } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [recipes, setRecipes] = useState<Recipe[]>([]);
+    const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -55,8 +56,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
         }
     };
 
+    const fetchFavoriteRecipes = async () => {
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/favorites`);
+            if (response.ok) {
+                const data = await response.json();
+                setFavoriteRecipes(data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch favorite recipes:', err);
+        }
+    };
+
     useEffect(() => {
         fetchMyRecipes();
+        fetchFavoriteRecipes();
     }, []);
 
     const handleSearch = (e: React.FormEvent) => {
@@ -81,6 +95,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
             }
 
             await fetchMyRecipes();
+            await fetchFavoriteRecipes();
             setIsModalOpen(false);
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Nastala chyba při vytváření receptu');
@@ -114,6 +129,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
             }
 
             await fetchMyRecipes();
+            await fetchFavoriteRecipes();
             setEditingRecipe(null);
             setIsModalOpen(false);
         } catch (err) {
@@ -290,7 +306,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
                         <span className="text-slate-500">Moje Recepty</span>
                     </Card>
                     <Card className="flex flex-col items-center text-center">
-                        <span className="text-4xl font-bold text-emerald-600 mb-2">0</span>
+                        <span className="text-4xl font-bold text-emerald-600 mb-2">{favoriteRecipes.length}</span>
                         <span className="text-slate-500">Oblíbené</span>
                     </Card>
                     <Card className="flex flex-col items-center text-center">

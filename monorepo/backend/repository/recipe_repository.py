@@ -77,6 +77,7 @@ class RecipeRepository:
         skip: int = 0, 
         limit: int = 100, 
         author_id: Optional[str] = None,
+        favorited_by_user_id: Optional[str] = None,
         public_only: bool = False,
         search_query: Optional[str] = None,
         tags: Optional[List[str]] = None
@@ -85,6 +86,9 @@ class RecipeRepository:
         
         if author_id:
             query["author_id"] = author_id
+
+        if favorited_by_user_id:
+            query["favorite_by"] = favorited_by_user_id
         
         if public_only:
             # If requesting public only, we filter by visibility.
