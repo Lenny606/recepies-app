@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
-import { Plus, Trash2, Video, Wand2 } from 'lucide-react';
+import { Plus, Trash2, Video, Wand2, Globe } from 'lucide-react';
 
 interface Ingredient {
     name: string;
@@ -110,11 +110,12 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
 
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2">
-                        Webová stránka
+                        <Globe className="w-4 h-4 text-emerald-600" />
+                        <span className="text-emerald-800 font-medium">Webová stránka</span>
                     </label>
                     <div className="flex gap-2">
                         <Input
-                            className="flex-1"
+                            className="flex-1 border-emerald-500 bg-emerald-50/30 ring-emerald-500/20"
                             value={webUrl}
                             onChange={(e) => setWebUrl(e.target.value)}
                             placeholder="https://example.com/recept"
@@ -124,7 +125,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
                                 type="button"
                                 variant="secondary"
                                 onClick={(e) => handleSubmit(e, true)}
-                                className="whitespace-nowrap flex items-center gap-2 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                className="whitespace-nowrap flex items-center gap-2 bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200"
                                 disabled={isSubmitting}
                             >
                                 <Wand2 className="w-4 h-4" /> Vytvořit z webu
@@ -132,7 +133,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
                         )}
                     </div>
                     {webUrl && !initialData && (
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-emerald-600 font-medium">
                             AI automaticky načte ingredience a postup z uvedené stránky.
                         </p>
                     )}
