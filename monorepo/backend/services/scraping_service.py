@@ -13,7 +13,8 @@ class ScrapingService:
     def __init__(self, timeout: int = 10):
         self.timeout = timeout
         self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            "User-Agent": "curl/7.68.0",
+            "Accept": "*/*"
         }
 
     async def scrape_url(self, url: str) -> Dict[str, Any]:
@@ -69,7 +70,7 @@ class ScrapingService:
             return og_image.get("content")
 
         # 2. Look for Twitter card image
-        twitter_image = soup.find("meta", name="twitter:image")
+        twitter_image = soup.find("meta", attrs={"name": "twitter:image"})
         if twitter_image and twitter_image.get("content"):
             return twitter_image.get("content")
 
