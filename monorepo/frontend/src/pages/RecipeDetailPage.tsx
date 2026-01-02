@@ -165,7 +165,10 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
         }
     };
 
-    const handleAddToShoppingCart = async (ing: Ingredient) => {
+    const handleAddToShoppingCart = async (ing: Ingredient, index: number) => {
+        if (addingIndices.has(index)) return;
+
+        setAddingIndices(prev => new Set(prev).add(index));
         try {
             const itemValue = `${ing.name} (${ing.amount} ${ing.unit || ''})`.trim();
             const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/shopping-cart/items`, {
@@ -178,13 +181,25 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
             });
 
             if (response.ok) {
-                // We could use a toast here, but for now simple alert or just silent success
-                // alert(`Přidáno do košíku: ${ing.name}`);
+                setSavedIndices(prev => new Set(prev).add(index));
+                setTimeout(() => {
+                    setSavedIndices(prev => {
+                        const next = new Set(prev);
+                        next.delete(index);
+                        return next;
+                    });
+                }, 2000);
             } else {
                 throw new Error('Nepodařilo se přidat do košíku');
             }
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Nastala chyba');
+        } finally {
+            setAddingIndices(prev => {
+                const next = new Set(prev);
+                next.delete(index);
+                return next;
+            });
         }
     };
 
@@ -365,24 +380,39 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                                 Ingredience
                             </h3>
                             <ul className="space-y-4">
-                                {recipe.ingredients.map((ing, idx) => (
-                                    <li key={idx} className="flex justify-between items-center gap-2 pb-3 border-b border-slate-50 last:border-0 group">
-                                        <div className="flex flex-col">
-                                            <span className="text-slate-700 font-medium">{ing.name}</span>
-                                            <span className="text-emerald-600 text-sm font-bold">
-                                                {ing.amount} {ing.unit}
-                                            </span>
-                                        </div>
-                                        <Button
-                                            variant="secondary"
-                                            className="!p-2 h-9 w-9 bg-emerald-50 text-emerald-600 border-none hover:bg-emerald-100 flex-shrink-0"
-                                            onClick={() => handleAddToShoppingCart(ing)}
-                                            title="Přidat do nákupního seznamu"
-                                        >
-                                            <Plus className="w-4 h-4" />
-                                        </Button>
-                                    </li>
-                                ))}
+                                {recipe.ingredients.map((ing, idx) => {
+                                    const isAdding = addingIndices.has(idx);
+                                    const isSaved = savedIndices.has(idx);
+
+                                    return (
+                                        <li key={idx} className="flex justify-between items-center gap-2 pb-3 border-b border-slate-50 last:border-0 group">
+                                            <div className="flex flex-col">
+                                                <span className="text-slate-700 font-medium">{ing.name}</span>
+                                                <span className="text-emerald-600 text-sm font-bold">
+                                                    {ing.amount} {ing.unit}
+                                                </span>
+                                            </div>
+                                            <Button
+                                                variant="secondary"
+                                                className={`!p-2 h-9 w-9 flex-shrink-0 border-none transition-all duration-300 ${isSaved
+                                                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                                                    : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                                                    }`}
+                                                onClick={() => handleAddToShoppingCart(ing, idx)}
+                                                disabled={isAdding}
+                                                title="Přidat do nákupního seznamu"
+                                            >
+                                                {isAdding ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : isSaved ? (
+                                                    <Check className="w-4 h-4" />
+                                                ) : (
+                                                    <Plus className="w-4 h-4" />
+                                                )}
+                                            </Button>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                             {recipe.ingredients.length === 0 && (
                                 <p className="text-slate-400 italic">Seznam ingrediencí je prázdný.</p>
