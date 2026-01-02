@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit, Utensils, Trash2, Sparkles, Heart } from 'lucide-react';
+import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit, Utensils, Trash2, Sparkles, Heart, Plus } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 import { Modal } from '../components/ui/Modal';
@@ -158,6 +158,29 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
 
             const updatedRecipe = await response.json();
             setRecipe(prev => prev ? { ...prev, is_favorite: updatedRecipe.is_favorite } : null);
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Nastala chyba');
+        }
+    };
+
+    const handleAddToShoppingCart = async (ing: Ingredient) => {
+        try {
+            const itemValue = `${ing.name} (${ing.amount} ${ing.unit || ''})`.trim();
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/shopping-cart/items`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: `${recipeId}-${ing.name}-${Date.now()}`,
+                    value: itemValue
+                })
+            });
+
+            if (response.ok) {
+                // We could use a toast here, but for now simple alert or just silent success
+                // alert(`Přidáno do košíku: ${ing.name}`);
+            } else {
+                throw new Error('Nepodařilo se přidat do košíku');
+            }
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Nastala chyba');
         }
@@ -341,11 +364,21 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                             </h3>
                             <ul className="space-y-4">
                                 {recipe.ingredients.map((ing, idx) => (
-                                    <li key={idx} className="flex justify-between items-start gap-4 pb-3 border-b border-slate-50 last:border-0">
-                                        <span className="text-slate-700 font-medium">{ing.name}</span>
-                                        <span className="text-emerald-600 font-bold whitespace-nowrap">
-                                            {ing.amount} {ing.unit}
-                                        </span>
+                                    <li key={idx} className="flex justify-between items-center gap-2 pb-3 border-b border-slate-50 last:border-0 group">
+                                        <div className="flex flex-col">
+                                            <span className="text-slate-700 font-medium">{ing.name}</span>
+                                            <span className="text-emerald-600 text-sm font-bold">
+                                                {ing.amount} {ing.unit}
+                                            </span>
+                                        </div>
+                                        <Button
+                                            variant="secondary"
+                                            className="!p-2 h-9 w-9 bg-emerald-50 text-emerald-600 border-none hover:bg-emerald-100 flex-shrink-0"
+                                            onClick={() => handleAddToShoppingCart(ing)}
+                                            title="Přidat do nákupního seznamu"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                        </Button>
                                     </li>
                                 ))}
                             </ul>
