@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { ChevronLeft, Search, User, Edit, Heart } from 'lucide-react';
+import { ChevronLeft, Search, User, Edit, Heart, Plus } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 import { Modal } from '../components/ui/Modal';
@@ -20,6 +20,21 @@ interface Recipe {
     video_url?: string;
     web_url?: string;
     is_favorite?: boolean;
+    steps?: string[];
+    ingredients?: { name: string; amount: string; unit?: string }[];
+    visibility?: string;
+}
+
+interface RecipeFormData {
+    title: string;
+    description: string;
+    video_url: string;
+    web_url: string;
+    steps: string[];
+    ingredients: { name: string; amount: string; unit?: string }[];
+    tags: string[];
+    visibility: string;
+    should_scrape?: boolean;
 }
 
 interface PublicRecipesPageProps {
@@ -34,6 +49,7 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
     const [search, setSearch] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchRecipes = async (searchTerm = '') => {
@@ -64,12 +80,38 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
         fetchRecipes(search);
     };
 
+    const handleCreateRecipe = async (recipeData: RecipeFormData) => {
+        setIsSubmitting(true);
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/recipes/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(recipeData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Nepodařilo se vytvořit recept');
+            }
+
+            await fetchRecipes();
+            setIsModalOpen(false);
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Nastala chyba při vytváření receptu');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const handleEditClick = (e: React.MouseEvent, recipe: Recipe) => {
         e.stopPropagation();
         setEditingRecipe(recipe);
+        setIsModalOpen(true);
     };
 
-    const handleUpdateRecipe = async (updateData: any) => {
+    const handleUpdateRecipe = async (updateData: RecipeFormData) => {
         if (!editingRecipe) return;
         setIsSubmitting(true);
         try {
@@ -94,6 +136,7 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                 return (rId && rId === updatedId) ? updatedRecipe : r;
             }));
             setEditingRecipe(null);
+            setIsModalOpen(false);
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Nastala chyba při aktualizaci receptu');
         } finally {
@@ -158,6 +201,14 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                         />
                     </div>
                     <Button type="submit">Hledat</Button>
+                    <Button
+                        type="button"
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 justify-center"
+                    >
+                        <Plus className="w-5 h-5" />
+                        Nový recept
+                    </Button>
                 </form>
 
                 {/* Results Area */}
@@ -248,18 +299,22 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                 )}
 
                 <Modal
-                    isOpen={!!editingRecipe}
-                    onClose={() => setEditingRecipe(null)}
-                    title="Upravit recept"
+                    isOpen={isModalOpen}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setEditingRecipe(null);
+                    }}
+                    title={editingRecipe ? "Upravit recept" : "Vytvořit nový recept"}
                 >
-                    {editingRecipe && (
-                        <RecipeForm
-                            onSubmit={handleUpdateRecipe}
-                            onCancel={() => setEditingRecipe(null)}
-                            isSubmitting={isSubmitting}
-                            initialData={editingRecipe}
-                        />
-                    )}
+                    <RecipeForm
+                        onSubmit={editingRecipe ? handleUpdateRecipe : handleCreateRecipe}
+                        onCancel={() => {
+                            setIsModalOpen(false);
+                            setEditingRecipe(null);
+                        }}
+                        isSubmitting={isSubmitting}
+                        initialData={editingRecipe ?? undefined}
+                    />
                 </Modal>
             </main>
         </div>
