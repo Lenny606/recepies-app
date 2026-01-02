@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
-import { LogOut, Search, Sparkles, Plus } from 'lucide-react';
+import { LogOut, Search, Sparkles, Plus, Globe } from 'lucide-react';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { API_BASE_URL } from '../config';
@@ -243,7 +243,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
                         <Sparkles className="w-5 h-5" />
                         AI Asistent
                     </Button>
+
                 </form>
+
+                <div className="flex justify-center mb-12">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={onNavigateToPublic}
+                        className="flex items-center gap-2 justify-center w-full sm:w-auto px-12 py-6 text-lg shadow-sm hover:shadow-md transition-all border-slate-200"
+                    >
+                        <Globe className="w-6 h-6" />
+                        Všechny recepty
+                    </Button>
+                </div>
 
                 {/* My Recipes Grid */}
                 {loading ? (
