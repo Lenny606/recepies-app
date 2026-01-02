@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
-import { LogOut, Plus, Search, Sparkles, User, Edit } from 'lucide-react';
+import { LogOut, Search, Sparkles, Plus } from 'lucide-react';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { API_BASE_URL } from '../config';
 import { Modal } from '../components/ui/Modal';
 import { RecipeForm } from '../components/RecipeForm';
-import { getYouTubeThumbnailUrl } from '../utils/videoUtils';
+// getYouTubeThumbnailUrl removed as it is not used directly anymore
 import { Carousel } from '../components/Carousel';
+import { HeroRecipeCard } from '../components/HeroRecipeCard';
+import { RecipeGridCard } from '../components/RecipeGridCard';
 
 interface Recipe {
     _id?: string;
     id?: string;
     title: string;
     description?: string;
-    author_id: string;
+    author_id?: string;
     tags: string[];
     created_at: string;
     video_url?: string;
@@ -205,7 +207,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
                             <Sparkles className="w-6 h-6 text-emerald-500" />
                             Dnešní inspirace
                         </h2>
-                        <Carousel recipes={randomRecipes} onSelectRecipe={onSelectRecipe} />
+                        <Carousel
+                            items={randomRecipes}
+                            renderItem={(recipe) => (
+                                <HeroRecipeCard
+                                    recipe={recipe}
+                                    onClick={() => onSelectRecipe((recipe.id || recipe._id)!)}
+                                />
+                            )}
+                        />
                     </div>
                 )}
 
@@ -270,59 +280,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                        {recipes.map((recipe) => (
-                            <Card
-                                key={recipe.id || recipe._id}
-                                onClick={() => onSelectRecipe((recipe.id || recipe._id)!)}
-                                className="group hover:shadow-lg transition-shadow cursor-pointer border-slate-200 flex flex-col h-full"
-                            >
-                                <div className="p-1 flex flex-col h-full">
-                                    <div className="h-40 bg-slate-100 rounded-lg mb-4 flex items-center justify-center text-4xl group-hover:bg-emerald-50 transition-colors overflow-hidden relative">
-                                        {recipe.video_url && getYouTubeThumbnailUrl(recipe.video_url) ? (
-                                            <img
-                                                src={getYouTubeThumbnailUrl(recipe.video_url)!}
-                                                alt={recipe.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                            />
-                                        ) : (
-                                            <span>🥘</span>
-                                        )}
-                                    </div>
-                                    <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-emerald-700 transition-colors">
-                                        {recipe.title}
-                                    </h3>
-                                    <p className="text-slate-500 text-sm line-clamp-2 mb-4 flex-grow">
-                                        {recipe.description || 'Bez popisu.'}
-                                    </p>
-
-                                    <div className="flex flex-wrap gap-2 mb-4">
-                                        {recipe.tags.map(tag => (
-                                            <span key={tag} className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">
-                                                #{tag}
-                                            </span>
-                                        ))}
-                                    </div>
-
-                                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-slate-400 text-xs mt-auto">
-                                        <div className="flex items-center gap-1 font-medium text-emerald-600">
-                                            <User className="w-3 h-3" />
-                                            <span>Můj recept</span>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <button
-                                                onClick={(e) => handleEditClick(e, recipe)}
-                                                className="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-medium"
-                                            >
-                                                <Edit className="w-3 h-3" />
-                                                <span>Upravit</span>
-                                            </button>
-                                            <span>{new Date(recipe.created_at).toLocaleDateString()}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        ))}
+                    <div className="mb-12">
+                        <Carousel
+                            items={recipes}
+                            renderItem={(recipe) => (
+                                <RecipeGridCard
+                                    recipe={recipe}
+                                    onClick={() => onSelectRecipe((recipe.id || recipe._id)!)}
+                                    onEdit={handleEditClick}
+                                />
+                            )}
+                        />
                     </div>
                 )}
 
@@ -342,7 +310,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
                     </Card>
                 </div>
 
-            </main>
-        </div>
+            </main >
+        </div >
     );
 };
