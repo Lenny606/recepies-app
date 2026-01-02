@@ -43,6 +43,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
     const [error, setError] = useState<string | null>(null);
     const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [cartCount, setCartCount] = useState(0);
 
     const fetchMyRecipes = async (searchTerm = '') => {
         setLoading(true);
@@ -87,11 +88,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
         }
     };
 
+    const fetchCartCount = async () => {
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/shopping-cart/me`);
+            if (response.ok) {
+                const data = await response.json();
+                setCartCount(data.items.length);
+            }
+        } catch (err) {
+            console.error('Failed to fetch shopping cart count:', err);
+        }
+    };
+
     useEffect(() => {
         fetchMyRecipes();
         fetchFavoriteRecipes();
         fetchRandomRecipes();
-    }, []);
+        fetchCartCount();
+    }, [authenticatedFetch]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -324,8 +338,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
                         <span className="text-4xl font-bold text-emerald-600 mb-2">{favoriteRecipes.length}</span>
                         <span className="text-slate-500">Oblíbené</span>
                     </Card>
-                    <Card className="flex flex-col items-center text-center">
-                        <span className="text-4xl font-bold text-emerald-600 mb-2">0</span>
+                    <Card
+                        className="flex flex-col items-center text-center cursor-pointer hover:border-emerald-200 hover:shadow-md transition-all"
+                        onClick={() => navigate('/shopping-cart')}
+                    >
+                        <span className="text-4xl font-bold text-emerald-600 mb-2">{cartCount}</span>
                         <span className="text-slate-500">Nákupní seznam</span>
                     </Card>
                 </div>

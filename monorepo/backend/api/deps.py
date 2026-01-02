@@ -6,6 +6,7 @@ from core.config import get_settings
 from core.database import get_database
 from repository.user_repository import UserRepository
 from repository.recipe_repository import RecipeRepository
+from repository.shopping_cart_repository import ShoppingCartRepository
 from domain.user import UserInDB
 from services.recipe_service import RecipeService
 from services.scraping_service import ScrapingService
@@ -20,6 +21,9 @@ async def get_user_repo(db = Depends(get_database)) -> UserRepository:
 
 async def get_recipe_repo(db = Depends(get_database)) -> RecipeRepository:
     return RecipeRepository(db)
+
+async def get_shopping_cart_repo(db = Depends(get_database)) -> ShoppingCartRepository:
+    return ShoppingCartRepository(db)
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme), 

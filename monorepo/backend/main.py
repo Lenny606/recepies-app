@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from core.config import get_settings
 from core.database import db
-from api import auth, users, recipes, agent
+from api import auth, users, recipes, agent, shopping_cart
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -43,6 +43,7 @@ app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["aut
 app.include_router(users.router, prefix=f"{settings.API_V1_STR}/users", tags=["users"])
 app.include_router(recipes.router, prefix=f"{settings.API_V1_STR}/recipes", tags=["recipes"])
 app.include_router(agent.router, prefix=f"{settings.API_V1_STR}/agent", tags=["agent"])
+app.include_router(shopping_cart.router, prefix=f"{settings.API_V1_STR}/shopping-cart", tags=["shopping-cart"])
 
 @app.get("/health")
 async def health_check():
