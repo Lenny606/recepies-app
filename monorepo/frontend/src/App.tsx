@@ -3,6 +3,7 @@ import { LoginPage } from './pages/LoginPage';
 import { LandingPage } from './pages/LandingPage';
 import { PublicRecipesPage } from './pages/PublicRecipesPage';
 import { RecipeDetailPage } from './pages/RecipeDetailPage';
+import { AIAssistantPage } from './pages/AIAssistantPage';
 import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 
 const RecipeDetailWrapper = () => {
@@ -48,6 +49,7 @@ const AppContent = () => {
         }
       />
       <Route path="/recipes/:id" element={<RecipeDetailWrapper />} />
+      <Route path="/ai-assistant" element={<AIAssistantPage />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

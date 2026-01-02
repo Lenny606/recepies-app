@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { LogOut, Search, Sparkles, Plus, Globe } from 'lucide-react';
@@ -31,6 +32,7 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, onSelectRecipe }) => {
+    const navigate = useNavigate();
     const { user, logout, authenticatedFetch } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -239,7 +241,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
                         <Plus className="w-5 h-5" />
                         Nový recept
                     </Button>
-                    <Button type="button" variant="secondary" className="flex items-center gap-2 justify-center text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => navigate('/ai-assistant')}
+                        className="flex items-center gap-2 justify-center text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200"
+                    >
                         <Sparkles className="w-5 h-5" />
                         AI Asistent
                     </Button>
