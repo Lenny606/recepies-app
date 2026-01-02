@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit, Utensils, Trash2, Sparkles, Heart, Plus } from 'lucide-react';
+import { ChevronLeft, Clock, Tag, ChefHat, Info, Video, Edit, Utensils, Trash2, Sparkles, Heart, Plus, Check, Loader2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 import { Modal } from '../components/ui/Modal';
@@ -43,6 +43,8 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [addingIndices, setAddingIndices] = useState<Set<number>>(new Set());
+    const [savedIndices, setSavedIndices] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         const fetchRecipe = async () => {
