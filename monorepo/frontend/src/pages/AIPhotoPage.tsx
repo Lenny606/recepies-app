@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
-import { Camera, ChevronLeft, RefreshCw, Check } from 'lucide-react';
+import { ChevronLeft, RefreshCw, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const AIPhotoPage: React.FC = () => {
