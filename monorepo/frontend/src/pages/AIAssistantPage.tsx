@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../components/ui/Button';
-import { ChevronLeft, Sparkles, Construction } from 'lucide-react';
+import { ChevronLeft, Sparkles, Construction, Camera } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const AIAssistantPage: React.FC = () => {
@@ -41,7 +41,20 @@ export const AIAssistantPage: React.FC = () => {
                     Brzy vám pomůže vymyslet, co uvařit ze zbytků v lednici!
                 </p>
 
-                <div className="mt-12">
+                <div className="mt-12 flex flex-col items-center gap-4">
+                    <div className="md:hidden w-full max-w-xs">
+                        <Button
+                            onClick={() => navigate('/ai-photo')}
+                            className="w-full py-6 flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-lg shadow-lg shadow-emerald-200"
+                        >
+                            <Camera className="w-6 h-6" />
+                            <span>Vyfotit lednici</span>
+                        </Button>
+                        <p className="text-sm text-slate-400 mt-2">
+                            Vyfoťte obsah lednice a my vymyslíme recept
+                        </p>
+                    </div>
+
                     <Button onClick={() => navigate('/')} variant="outline" className="px-8">
                         Zpět do kuchyně
                     </Button>
