@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File
 from services.ai_service import AIService, get_ai_service
 from domain.agent import ChatRequest, ChatResponse
 from api.deps import get_current_active_user
@@ -32,3 +32,20 @@ async def analyze_video_recipe(
     if not success:
         return {"status": "error", "message": "Failed to update recipe from AI analysis"}
     return {"status": "success", "message": "Recipe updated successfully"}
+
+@router.post("/analyze-fridge")
+async def analyze_fridge(
+    file: UploadFile = File(...),
+    ai_service: AIService = Depends(get_ai_service),
+    current_user: UserInDB = Depends(get_current_active_user)
+):
+    """
+    Analyze a photo of a fridge/ingredients.
+    CURRENTLY SKELETON ONLY: Returns success if file is received.
+    """
+    if not file:
+        return {"status": "error", "message": "No file uploaded"}
+    
+    # Logic to process image will go here
+    
+    return {"status": "success", "message": "Image received"}
