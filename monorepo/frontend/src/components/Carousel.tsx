@@ -18,7 +18,7 @@ export const Carousel = <T extends any>({
     keyExtractor,
     autoSlide = true,
     autoSlideInterval = 3000,
-    autoSlideThreshold = 4
+    autoSlideThreshold = 3
 }: CarouselProps<T>) => {
     const scrollRef = React.useRef<HTMLDivElement>(null);
     const [isPaused, setIsPaused] = React.useState(false);
