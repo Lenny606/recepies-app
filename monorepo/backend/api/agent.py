@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from services.ai_service import AIService, get_ai_service
-from domain.agent import ChatRequest, ChatResponse
+from domain.agent import ChatRequest, ChatResponse, IngredientsRequest
 from api.deps import get_current_active_user
 from domain.user import UserInDB
 
@@ -16,6 +16,18 @@ async def chat_with_agent(
     Send a message to the AI culinary assistant.
     """
     response_text = await ai_service.get_chat_completion(request.message)
+    return ChatResponse(response=response_text)
+
+@router.post("/generate-from-ingredients", response_model=ChatResponse)
+async def generate_from_ingredients(
+    request: IngredientsRequest,
+    ai_service: AIService = Depends(get_ai_service),
+    current_user: UserInDB = Depends(get_current_active_user)
+):
+    """
+    Generate a recipe based on a list of ingredients.
+    """
+    response_text = await ai_service.generate_recipe_from_ingredients(request.ingredients)
     return ChatResponse(response=response_text)
 
 @router.post("/analyze-video/{recipe_id}")

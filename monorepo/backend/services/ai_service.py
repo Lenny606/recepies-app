@@ -198,6 +198,31 @@ class AIService:
             print(f"Error updating recipe: {e}")
             return False
 
+    async def generate_recipe_from_ingredients(self, ingredients: List[str]) -> str:
+        """
+        Generates a recipe based on a list of ingredients.
+        """
+        if not settings.GEMINI_API_KEY:
+            return "AI feature is not configured. Please add GEMINI_API_KEY to .env"
+
+        ingredients_str = ", ".join(ingredients)
+        prompt = f"Navrhni chutný recept, který využívá tyto ingredience: {ingredients_str}. Můžeš přidat i základní suroviny (sůl, pepř, olej, voda atd.)."
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": "Jsi profesionální šéfkuchař a asistent. Na základě seznamu ingrediencí navrhneš recept. Odpověď formuluj jasně a strukturovaně v češtině. Recept musí obsahovat: Název, Seznam ingrediencí a Postup přípravy."
+                    },
+                    {"role": "user", "content": prompt},
+                ]
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"Chyba při komunikaci s AI: {str(e)}"
+
 # Dependency
 from core.database import get_database
 async def get_ai_service():

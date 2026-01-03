@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { ChevronLeft, Plus, Send, Loader2, Wand2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config';
 
 export const CreateRecipeFromIngredientsPage: React.FC = () => {
     const navigate = useNavigate();
+    const { authenticatedFetch } = useAuth();
     const [ingredients, setIngredients] = useState<string[]>(['', '', '']);
     const [isLoading, setIsLoading] = useState(false);
     const [response, setResponse] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const handleAddIngredient = () => {
         setIngredients([...ingredients, '']);
@@ -26,18 +30,29 @@ export const CreateRecipeFromIngredientsPage: React.FC = () => {
 
         setIsLoading(true);
         setResponse(null);
+        setError(null);
 
-        // Simulate backend request
-        setTimeout(() => {
+        try {
+            const apiResponse = await authenticatedFetch(`${API_BASE_URL}/api/v1/agent/generate-from-ingredients`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ingredients: filteredIngredients })
+            });
+
+            if (!apiResponse.ok) {
+                const errorData = await apiResponse.json();
+                throw new Error(errorData.detail || 'Nepodařilo se vygenerovat recept');
+            }
+
+            const data = await apiResponse.json();
+            setResponse(data.response);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Nastala nečekaná chyba');
+        } finally {
             setIsLoading(false);
-            setResponse(`Zde je váš recept na chutné jídlo z těchto ingrediencí: ${filteredIngredients.join(', ')}. 
-
-Postup:
-1. Připravte si všechny suroviny.
-2. Smíchejte je v hrnci.
-3. Vařte 15 minut na mírném ohni.
-4. Podávejte teplé!`);
-        }, 1500);
+        }
     };
 
     return (
@@ -118,6 +133,13 @@ Postup:
                         </div>
                     </form>
                 </div>
+
+                {/* Error Display */}
+                {error && (
+                    <div className="bg-red-50 border border-red-100 rounded-2xl p-4 mb-6 text-red-700 animate-in fade-in slide-in-from-top-2 duration-300">
+                        {error}
+                    </div>
+                )}
 
                 {/* Response Area */}
                 {response && (
