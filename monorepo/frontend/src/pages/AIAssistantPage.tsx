@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../components/ui/Button';
-import { ChevronLeft, Sparkles, Construction, Camera } from 'lucide-react';
+import { ChevronLeft, Sparkles, Construction, Camera, Wand2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const AIAssistantPage: React.FC = () => {
@@ -41,8 +41,19 @@ export const AIAssistantPage: React.FC = () => {
                     Brzy vám pomůže vymyslet, co uvařit ze zbytků v lednici!
                 </p>
 
-                <div className="mt-12 flex flex-col items-center gap-4">
-                    <div className="md:hidden w-full max-w-xs">
+                <div className="mt-12 flex flex-col items-center gap-4 w-full max-w-xs">
+                    <Button
+                        onClick={() => navigate('/ai-ingredients')}
+                        className="w-full py-6 flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-lg shadow-lg shadow-emerald-200"
+                    >
+                        <Wand2 className="w-6 h-6" />
+                        <span>Recept z ingrediencí</span>
+                    </Button>
+                    <p className="text-sm text-slate-400 mt-1 mb-4">
+                        Napište co máte doma a AI vám vymyslí recept
+                    </p>
+
+                    <div className="md:hidden w-full">
                         <Button
                             onClick={() => navigate('/ai-photo')}
                             className="w-full py-6 flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-lg shadow-lg shadow-emerald-200"
@@ -50,12 +61,12 @@ export const AIAssistantPage: React.FC = () => {
                             <Camera className="w-6 h-6" />
                             <span>Vyfotit lednici</span>
                         </Button>
-                        <p className="text-sm text-slate-400 mt-2">
+                        <p className="text-sm text-slate-400 mt-2 mb-4">
                             Vyfoťte obsah lednice a my vymyslíme recept
                         </p>
                     </div>
 
-                    <Button onClick={() => navigate('/')} variant="outline" className="px-8">
+                    <Button onClick={() => navigate('/')} variant="outline" className="px-8 mt-4">
                         Zpět do kuchyně
                     </Button>
                 </div>

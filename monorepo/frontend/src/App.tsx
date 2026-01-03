@@ -6,6 +6,7 @@ import { RecipeDetailPage } from './pages/RecipeDetailPage';
 import { AIAssistantPage } from './pages/AIAssistantPage';
 import { AIPhotoPage } from './pages/AIPhotoPage';
 import { ShoppingCartPage } from './pages/ShoppingCartPage';
+import { CreateRecipeFromIngredientsPage } from './pages/CreateRecipeFromIngredientsPage';
 import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 
 const RecipeDetailWrapper = () => {
@@ -52,6 +53,7 @@ const AppContent = () => {
       />
       <Route path="/recipes/:id" element={<RecipeDetailWrapper />} />
       <Route path="/ai-assistant" element={<AIAssistantPage />} />
+      <Route path="/ai-ingredients" element={<CreateRecipeFromIngredientsPage />} />
       <Route path="/ai-photo" element={<AIPhotoPage />} />
       <Route path="/shopping-cart" element={<ShoppingCartPage />} />
       <Route path="*" element={<Navigate to="/" />} />
