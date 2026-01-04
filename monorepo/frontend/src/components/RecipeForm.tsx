@@ -38,6 +38,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
     const [ingredients, setIngredients] = useState<Ingredient[]>(initialData?.ingredients || [{ name: '', amount: '', unit: '' }]);
     const [tags, setTags] = useState(initialData?.tags?.join(', ') || '');
     const [visibility, setVisibility] = useState(initialData?.visibility || 'public');
+    const [showManualFields, setShowManualFields] = useState(!!(initialData?.title || initialData?.id || initialData?._id));
 
     const handleAddStep = () => setSteps([...steps, '']);
     const handleRemoveStep = (index: number) => setSteps(steps.filter((_, i) => i !== index));
@@ -77,55 +78,25 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Název receptu *</label>
-                    <Input
-                        required
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Např. Tradiční Carbonara"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Popis</label>
-                    <textarea
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[100px]"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Krátce popište váš recept..."
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2">
-                        <Video className="w-4 h-4" /> Video URL (YouTube)
-                    </label>
-                    <Input
-                        value={videoUrl}
-                        onChange={(e) => setVideoUrl(e.target.value)}
-                        placeholder="https://www.youtube.com/watch?v=..."
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2">
-                        <Globe className="w-4 h-4 text-emerald-600" />
-                        <span className="text-emerald-800 font-medium">Webová stránka</span>
+                {/* Primary Action: Web Import */}
+                <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+                    <label className="block text-sm font-medium text-emerald-800 mb-2 flex items-center gap-2">
+                        <Globe className="w-4 h-4" />
+                        Webová stránka
                     </label>
                     <div className="flex gap-2">
                         <Input
-                            className="flex-1 border-emerald-500 bg-emerald-50/30 ring-emerald-500/20"
+                            className="flex-1 border-emerald-200 bg-white focus:ring-emerald-500"
                             value={webUrl}
                             onChange={(e) => setWebUrl(e.target.value)}
-                            placeholder="https://example.com/recept"
+                            placeholder="Vložte odkaz na recept (např. vareni.cz)"
                         />
                         {webUrl && !initialData && (
                             <Button
                                 type="button"
                                 variant="secondary"
                                 onClick={(e) => handleSubmit(e, true)}
-                                className="whitespace-nowrap flex items-center gap-2 bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200"
+                                className="whitespace-nowrap flex items-center gap-2 bg-emerald-600 text-white border-none hover:bg-emerald-700 shadow-sm"
                                 disabled={isSubmitting}
                             >
                                 <Wand2 className="w-4 h-4" /> Vytvořit z webu
@@ -133,101 +104,159 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
                         )}
                     </div>
                     {webUrl && !initialData && (
-                        <p className="mt-1 text-xs text-emerald-600 font-medium">
-                            AI automaticky načte ingredience a postup z uvedené stránky.
+                        <p className="mt-2 text-xs text-emerald-600 font-medium flex items-center gap-1">
+                            <Wand2 className="w-3 h-3" /> AI automaticky načte ingredience a postup z uvedené stránky.
                         </p>
                     )}
                 </div>
 
-                <div className="space-y-3">
-                    <label className="block text-sm font-medium text-slate-700">Ingredience</label>
-                    {ingredients.map((ing, idx) => (
-                        <div key={idx} className="flex gap-2">
-                            <Input
-                                className="flex-1"
-                                placeholder="Název (např. Mouka)"
-                                value={ing.name}
-                                onChange={(e) => handleIngredientChange(idx, 'name', e.target.value)}
-                            />
-                            <Input
-                                className="w-24"
-                                placeholder="Množství"
-                                value={ing.amount}
-                                onChange={(e) => handleIngredientChange(idx, 'amount', e.target.value)}
-                            />
-                            <Input
-                                className="w-20"
-                                placeholder="Jednotka"
-                                value={ing.unit}
-                                onChange={(e) => handleIngredientChange(idx, 'unit', e.target.value)}
-                            />
-                            {ingredients.length > 1 && (
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    className="!p-2 text-red-500 hover:text-red-700"
-                                    onClick={() => handleRemoveIngredient(idx)}
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                            )}
+                {!showManualFields && !initialData && (
+                    <div className="relative py-4">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-slate-200"></div>
                         </div>
-                    ))}
-                    <Button type="button" variant="secondary" onClick={handleAddIngredient} className="w-full">
-                        <Plus className="w-4 h-4 mr-2" /> Přidat ingredienci
-                    </Button>
-                </div>
-
-                <div className="space-y-3">
-                    <label className="block text-sm font-medium text-slate-700">Postup</label>
-                    {steps.map((step, idx) => (
-                        <div key={idx} className="flex gap-2">
-                            <div className="flex-1">
-                                <span className="text-xs text-slate-400 mb-1 block">Krok {idx + 1}</span>
-                                <textarea
-                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[60px]"
-                                    value={step}
-                                    onChange={(e) => handleStepChange(idx, e.target.value)}
-                                    placeholder="Napište instrukce..."
-                                />
-                            </div>
-                            {steps.length > 1 && (
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    className="self-end !p-2 mb-1 text-red-500 hover:text-red-700"
-                                    onClick={() => handleRemoveStep(idx)}
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                            )}
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-white px-2 text-slate-400">Nebo</span>
                         </div>
-                    ))}
-                    <Button type="button" variant="secondary" onClick={handleAddStep} className="w-full">
-                        <Plus className="w-4 h-4 mr-2" /> Přidat krok
-                    </Button>
-                </div>
+                    </div>
+                )}
 
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Tagy (oddělené čárkou)</label>
-                    <Input
-                        value={tags}
-                        onChange={(e) => setTags(e.target.value)}
-                        placeholder="např. itálie, pasta, rychlé"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Viditelnost</label>
-                    <select
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        value={visibility}
-                        onChange={(e) => setVisibility(e.target.value)}
+                {!showManualFields && !initialData && (
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => setShowManualFields(true)}
+                        className="w-full flex items-center justify-center gap-2 py-6 border-dashed border-2 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all rounded-xl text-slate-500"
                     >
-                        <option value="public">Veřejný</option>
-                        <option value="private">Soukromý</option>
-                    </select>
-                </div>
+                        <Plus className="w-5 h-5" />
+                        <span className="font-semibold">Vytvořit recept manuálně</span>
+                    </Button>
+                )}
+
+                {(showManualFields || !!initialData) && (
+                    <div className="space-y-6 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Název receptu *</label>
+                            <Input
+                                required
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                placeholder="Např. Tradiční Carbonara"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Popis</label>
+                            <textarea
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[100px] text-sm"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Krátce popište váš recept..."
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2">
+                                <Video className="w-4 h-4" /> Video URL (YouTube)
+                            </label>
+                            <Input
+                                value={videoUrl}
+                                onChange={(e) => setVideoUrl(e.target.value)}
+                                placeholder="https://www.youtube.com/watch?v=..."
+                            />
+                        </div>
+
+                        <div className="space-y-3">
+                            <label className="block text-sm font-medium text-slate-700">Ingredience</label>
+                            {ingredients.map((ing, idx) => (
+                                <div key={idx} className="flex gap-2">
+                                    <Input
+                                        className="flex-1"
+                                        placeholder="Název (např. Mouka)"
+                                        value={ing.name}
+                                        onChange={(e) => handleIngredientChange(idx, 'name', e.target.value)}
+                                    />
+                                    <Input
+                                        className="w-24"
+                                        placeholder="Množství"
+                                        value={ing.amount}
+                                        onChange={(e) => handleIngredientChange(idx, 'amount', e.target.value)}
+                                    />
+                                    <Input
+                                        className="w-20"
+                                        placeholder="Jednotka"
+                                        value={ing.unit}
+                                        onChange={(e) => handleIngredientChange(idx, 'unit', e.target.value)}
+                                    />
+                                    {ingredients.length > 1 && (
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            className="!p-2 text-red-500 hover:text-red-700"
+                                            onClick={() => handleRemoveIngredient(idx)}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                            ))}
+                            <Button type="button" variant="secondary" onClick={handleAddIngredient} className="w-full">
+                                <Plus className="w-4 h-4 mr-2" /> Přidat ingredienci
+                            </Button>
+                        </div>
+
+                        <div className="space-y-3">
+                            <label className="block text-sm font-medium text-slate-700">Postup</label>
+                            {steps.map((step, idx) => (
+                                <div key={idx} className="flex gap-2">
+                                    <div className="flex-1">
+                                        <span className="text-xs text-slate-400 mb-1 block">Krok {idx + 1}</span>
+                                        <textarea
+                                            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[60px] text-sm"
+                                            value={step}
+                                            onChange={(e) => handleStepChange(idx, e.target.value)}
+                                            placeholder="Napište instrukce..."
+                                        />
+                                    </div>
+                                    {steps.length > 1 && (
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            className="self-end !p-2 mb-1 text-red-500 hover:text-red-700"
+                                            onClick={() => handleRemoveStep(idx)}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                            ))}
+                            <Button type="button" variant="secondary" onClick={handleAddStep} className="w-full">
+                                <Plus className="w-4 h-4 mr-2" /> Přidat krok
+                            </Button>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Tagy (oddělené čárkou)</label>
+                            <Input
+                                value={tags}
+                                onChange={(e) => setTags(e.target.value)}
+                                placeholder="např. itálie, pasta, rychlé"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Viditelnost</label>
+                            <select
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                                value={visibility}
+                                onChange={(e) => setVisibility(e.target.value)}
+                            >
+                                <option value="public">Veřejný</option>
+                                <option value="private">Soukromý</option>
+                            </select>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="flex gap-3 pt-4">
