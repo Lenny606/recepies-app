@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { ChevronLeft, Search, User, Edit, Heart, Plus } from 'lucide-react';
+import { ChevronLeft, Search, User, Edit, Heart, Plus, Sparkles } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 import { Modal } from '../components/ui/Modal';
@@ -43,6 +44,7 @@ interface PublicRecipesPageProps {
 }
 
 export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, onSelectRecipe }) => {
+    const navigate = useNavigate();
     const { user, authenticatedFetch } = useAuth();
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [loading, setLoading] = useState(true);
@@ -208,6 +210,15 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                     >
                         <Plus className="w-5 h-5" />
                         Nový recept
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => navigate('/ai-assistant')}
+                        className="flex items-center gap-2 justify-center text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200"
+                    >
+                        <Sparkles className="w-5 h-5" />
+                        AI Asistent
                     </Button>
                 </form>
 
