@@ -30,7 +30,13 @@ export const RecipeGridCard: React.FC<RecipeGridCardProps> = ({ recipe, onClick,
         >
             <div className="p-1 flex flex-col h-full">
                 <div className="h-40 bg-slate-100 rounded-lg mb-4 flex items-center justify-center text-4xl group-hover:bg-emerald-50 transition-colors overflow-hidden relative">
-                    {recipe.video_url && getYouTubeThumbnailUrl(recipe.video_url) ? (
+                    {recipe.image_url ? (
+                        <img
+                            src={recipe.image_url}
+                            alt={recipe.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                    ) : recipe.video_url && getYouTubeThumbnailUrl(recipe.video_url) ? (
                         <img
                             src={getYouTubeThumbnailUrl(recipe.video_url)!}
                             alt={recipe.title}

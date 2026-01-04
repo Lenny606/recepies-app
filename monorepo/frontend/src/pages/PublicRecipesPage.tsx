@@ -20,6 +20,7 @@ interface Recipe {
     created_at: string;
     video_url?: string;
     web_url?: string;
+    image_url?: string;
     is_favorite?: boolean;
     steps?: string[];
     ingredients?: { name: string; amount: string; unit?: string }[];
@@ -249,7 +250,13 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
                             >
                                 <div className="p-1">
                                     <div className="h-40 bg-slate-100 rounded-lg mb-4 flex items-center justify-center text-4xl group-hover:bg-emerald-50 transition-colors overflow-hidden relative">
-                                        {recipe.video_url && getYouTubeThumbnailUrl(recipe.video_url) ? (
+                                        {recipe.image_url ? (
+                                            <img
+                                                src={recipe.image_url}
+                                                alt={recipe.title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            />
+                                        ) : recipe.video_url && getYouTubeThumbnailUrl(recipe.video_url) ? (
                                             <img
                                                 src={getYouTubeThumbnailUrl(recipe.video_url)!}
                                                 alt={recipe.title}

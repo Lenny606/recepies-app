@@ -16,6 +16,7 @@ interface Recipe {
     description?: string;
     video_url?: string;
     web_url?: string;
+    image_url?: string;
     steps: string[];
     ingredients: Ingredient[];
     tags: string[];
@@ -34,6 +35,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
     const [description, setDescription] = useState(initialData?.description || '');
     const [videoUrl, setVideoUrl] = useState(initialData?.video_url || '');
     const [webUrl, setWebUrl] = useState(initialData?.web_url || '');
+    const [imageUrl, setImageUrl] = useState(initialData?.image_url || '');
     const [steps, setSteps] = useState<string[]>(initialData?.steps || ['']);
     const [ingredients, setIngredients] = useState<Ingredient[]>(initialData?.ingredients || [{ name: '', amount: '', unit: '' }]);
     const [tags, setTags] = useState(initialData?.tags?.join(', ') || '');
@@ -65,6 +67,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
             description,
             video_url: videoUrl,
             web_url: webUrl,
+            image_url: imageUrl,
             steps: steps.filter(s => s.trim() !== ''),
             ingredients: ingredients.filter(i => i.name.trim() !== ''),
             tags: tags.split(',').map(t => t.trim()).filter(t => t !== ''),
@@ -163,6 +166,17 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onCancel, isSu
                                 value={videoUrl}
                                 onChange={(e) => setVideoUrl(e.target.value)}
                                 placeholder="https://www.youtube.com/watch?v=..."
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2">
+                                <Globe className="w-4 h-4" /> Náhledový obrázek (URL)
+                            </label>
+                            <Input
+                                value={imageUrl}
+                                onChange={(e) => setImageUrl(e.target.value)}
+                                placeholder="https://example.com/image.jpg"
                             />
                         </div>
 
