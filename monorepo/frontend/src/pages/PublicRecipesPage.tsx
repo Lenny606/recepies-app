@@ -193,7 +193,7 @@ export const PublicRecipesPage: React.FC<PublicRecipesPageProps> = ({ onBack, on
 
             <main className="max-w-7xl mx-auto px-4 py-8">
                 {/* Search Bar */}
-                <form onSubmit={handleSearch} className="flex gap-4 mb-8">
+                <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 mb-8">
                     <div className="flex-1 relative">
                         <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                         <Input
