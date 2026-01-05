@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
-import { LogOut, Search, Sparkles, Plus, Globe } from 'lucide-react';
+import { LogOut, Search, Sparkles, Plus, Globe, ShoppingCart } from 'lucide-react';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { API_BASE_URL } from '../config';
@@ -267,7 +267,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
 
                 </form>
 
-                <div className="flex justify-center mb-12">
+                <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
                     <Button
                         type="button"
                         variant="secondary"
@@ -276,6 +276,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPublic, on
                     >
                         <Globe className="w-6 h-6" />
                         Všechny recepty
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => navigate('/shopping-cart')}
+                        className="flex items-center gap-2 justify-center w-full sm:w-auto px-12 py-6 text-lg shadow-sm hover:shadow-md transition-all border-slate-200"
+                    >
+                        <div className="relative">
+                            <ShoppingCart className="w-6 h-6 text-emerald-600" />
+                            {cartCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </div>
+                        Nákupní seznam
                     </Button>
                 </div>
 
