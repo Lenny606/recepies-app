@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List
 from domain.user import UserResponse, UserInDB
 from repository.user_repository import UserRepository
@@ -12,8 +12,8 @@ async def read_users_me(current_user: UserInDB = Depends(get_current_active_user
 
 @router.get("/", response_model=List[UserResponse])
 async def read_users(
-    skip: int = 0, 
-    limit: int = 100, 
+    skip: int = 0,
+    limit: int = Query(default=100, ge=1, le=100),
     current_user: UserInDB = Depends(get_current_admin_user),
     user_repo: UserRepository = Depends(get_user_repo)
 ):

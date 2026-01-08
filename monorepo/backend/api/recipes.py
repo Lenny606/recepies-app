@@ -32,7 +32,7 @@ async def import_recipe_by_url(
 @router.get("/me", response_model=List[RecipeResponse])
 async def read_my_recipes(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = Query(default=100, ge=1, le=100),
     search: Optional[str] = None,
     current_user: UserInDB = Depends(get_current_user),
     service: RecipeService = Depends(get_recipe_service)
@@ -42,7 +42,7 @@ async def read_my_recipes(
 @router.get("/favorites", response_model=List[RecipeResponse])
 async def read_favorite_recipes(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = Query(default=100, ge=1, le=100),
     current_user: UserInDB = Depends(get_current_user),
     service: RecipeService = Depends(get_recipe_service)
 ):
@@ -85,7 +85,7 @@ async def toggle_favorite(
 @router.get("/", response_model=List[RecipeResponse])
 async def read_public_recipes(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = Query(default=100, ge=1, le=100),
     search: Optional[str] = None,
     tags: Optional[List[str]] = Query(None),
     current_user: Optional[UserInDB] = Depends(get_current_user_optional),
@@ -96,7 +96,7 @@ async def read_public_recipes(
 
 @router.get("/random", response_model=List[RecipeResponse])
 async def read_random_recipes(
-    limit: int = 5,
+    limit: int = Query(default=5, ge=1, le=20),
     current_user: Optional[UserInDB] = Depends(get_current_user_optional),
     service: RecipeService = Depends(get_recipe_service)
 ):
