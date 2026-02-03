@@ -18,7 +18,7 @@ export const AIConsultPage: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
-            text: 'Ahoj! Jsem tvůj AI kulinářský poradce. S čím ti dnes mohu pomoci? Můžeme probrat techniky vaření, náhrady surovin nebo plánování menu.',
+            text: 'Dobrý den. Jsem váš kulinářský asistent. Ptejte se na fakta, techniky nebo suroviny. S čím vám mohu poradit?',
             sender: 'ai',
             timestamp: new Date(),
         },
@@ -123,11 +123,11 @@ export const AIConsultPage: React.FC = () => {
                                 </div>
                                 <div
                                     className={`rounded-2xl px-4 py-3 shadow-sm ${message.sender === 'user'
-                                            ? 'bg-emerald-600 text-white rounded-tr-none'
-                                            : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none'
+                                        ? 'bg-emerald-600 text-white rounded-tr-none'
+                                        : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none'
                                         }`}
                                 >
-                                    <p className="text-sm md:text-base leading-relaxed">{message.text}</p>
+                                    <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">{message.text}</p>
                                     <span
                                         className={`text-[10px] mt-1 block ${message.sender === 'user' ? 'text-emerald-100' : 'text-slate-400'
                                             }`}
