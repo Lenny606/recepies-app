@@ -4,6 +4,7 @@ import { LandingPage } from './pages/LandingPage';
 import { PublicRecipesPage } from './pages/PublicRecipesPage';
 import { RecipeDetailPage } from './pages/RecipeDetailPage';
 import { AIAssistantPage } from './pages/AIAssistantPage';
+import { AIConsultPage } from './pages/AIConsultPage';
 import { AIPhotoPage } from './pages/AIPhotoPage';
 import { ShoppingCartPage } from './pages/ShoppingCartPage';
 import { CreateRecipeFromIngredientsPage } from './pages/CreateRecipeFromIngredientsPage';
@@ -53,6 +54,7 @@ const AppContent = () => {
       />
       <Route path="/recipes/:id" element={<RecipeDetailWrapper />} />
       <Route path="/ai-assistant" element={<AIAssistantPage />} />
+      <Route path="/ai-consult" element={<AIConsultPage />} />
       <Route path="/ai-ingredients" element={<CreateRecipeFromIngredientsPage />} />
       <Route path="/ai-photo" element={<AIPhotoPage />} />
       <Route path="/shopping-cart" element={<ShoppingCartPage />} />
