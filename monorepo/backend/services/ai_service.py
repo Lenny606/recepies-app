@@ -223,6 +223,29 @@ class AIService:
         except Exception as e:
             return f"Chyba při komunikaci s AI: {str(e)}"
 
+    async def get_consultation_completion(self, messages: List[Dict[str, str]]) -> str:
+        """
+        Generic chat completion for general culinary consultations.
+        """
+        if not settings.GEMINI_API_KEY:
+            return "AI feature is not configured. Please add GEMINI_API_KEY to .env"
+
+        try:
+            full_messages = [
+                {
+                    "role": "system",
+                    "content": "Jsi profesionální šéfkuchař a kulinářský poradce. Odpovídej přátelsky, odborně a česky. Pomáhej s technikami vaření, náhradami surovin, plánováním menu a kulinářskými dotazy."
+                }
+            ] + messages
+
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=full_messages
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"Chyba při komunikaci s AI: {str(e)}"
+
 # Dependency
 from core.database import get_database
 async def get_ai_service():

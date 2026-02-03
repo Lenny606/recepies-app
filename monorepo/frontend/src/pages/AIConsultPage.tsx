@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
 import { ChevronLeft, Send, User, Bot, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config';
 
 interface Message {
     id: string;
@@ -12,6 +14,7 @@ interface Message {
 
 export const AIConsultPage: React.FC = () => {
     const navigate = useNavigate();
+    const { authenticatedFetch } = useAuth();
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
@@ -32,7 +35,7 @@ export const AIConsultPage: React.FC = () => {
         scrollToBottom();
     }, [messages, isTyping]);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (!inputValue.trim()) return;
 
         const userMessage: Message = {
@@ -42,21 +45,49 @@ export const AIConsultPage: React.FC = () => {
             timestamp: new Date(),
         };
 
-        setMessages((prev) => [...prev, userMessage]);
+        const newMessages = [...messages, userMessage];
+        setMessages(newMessages);
         setInputValue('');
         setIsTyping(true);
 
-        // Mock AI response
-        setTimeout(() => {
+        try {
+            const apiMessages = newMessages.map(m => ({
+                role: m.sender === 'user' ? 'user' : 'assistant',
+                content: m.text
+            }));
+
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/agent/consult`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ messages: apiMessages })
+            });
+
+            if (!response.ok) {
+                throw new Error('Nepodařilo se spojit s AI');
+            }
+
+            const data = await response.json();
+
             const aiMessage: Message = {
                 id: (Date.now() + 1).toString(),
-                text: 'To zní zajímavě! Momentálně se ještě učím všechny tajné recepty světa, ale brzy ti budu schopen poradit s čímkoliv. Zkus se mě zeptat na něco jiného za chvíli!',
+                text: data.response,
                 sender: 'ai',
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, aiMessage]);
+        } catch (err) {
+            const errorMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                text: 'Omlouvám se, ale nastala chyba při komunikaci se šéfkuchařem. Zkuste to prosím znovu za chvíli.',
+                sender: 'ai',
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, errorMessage]);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     return (
