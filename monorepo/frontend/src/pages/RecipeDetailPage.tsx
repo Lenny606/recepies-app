@@ -45,6 +45,9 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [addingIndices, setAddingIndices] = useState<Set<number>>(new Set());
     const [savedIndices, setSavedIndices] = useState<Set<number>>(new Set());
+    const [selectedIngredient, setSelectedIngredient] = useState<string | null>(null);
+    const [consultationResponse, setConsultationResponse] = useState<string | null>(null);
+    const [isConsulting, setIsConsulting] = useState(false);
 
     useEffect(() => {
         const fetchRecipe = async () => {
@@ -203,6 +206,36 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
         }
     };
 
+    const handleIngredientClick = async (ingredientName: string) => {
+        setSelectedIngredient(ingredientName);
+        setIsConsulting(true);
+        setConsultationResponse(null);
+
+        try {
+            const prompt = `get short information about ingredient ${ingredientName}, positive/negative, max 3 of both`;
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/v1/agent/consult`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    messages: [
+                        { role: 'user', content: prompt }
+                    ]
+                })
+            });
+
+            if (!response.ok) throw new Error('Nepodařilo se získat informace o ingredienci');
+
+            const data = await response.json();
+            setConsultationResponse(data.response);
+        } catch (err) {
+            setConsultationResponse('Omlouvám se, ale nepodařilo se načíst informace o této ingredienci.');
+        } finally {
+            setIsConsulting(false);
+        }
+    };
+
     const handleDeleteRecipe = async () => {
         if (!window.confirm('Opravdu chcete tento recept smazat? Tato akce je nevratná.')) {
             return;
@@ -305,6 +338,32 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                 />
             </Modal>
 
+            <Modal
+                isOpen={!!selectedIngredient}
+                onClose={() => {
+                    setSelectedIngredient(null);
+                    setConsultationResponse(null);
+                }}
+                title={selectedIngredient || 'Detail ingredience'}
+            >
+                {isConsulting ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                        <Loader2 className="w-10 h-10 text-emerald-600 animate-spin mb-4" />
+                        <p className="text-slate-500 font-medium">Zjišťuji informace od šéfkuchaře...</p>
+                    </div>
+                ) : consultationResponse ? (
+                    <div className="prose prose-slate max-w-none">
+                        <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                            {consultationResponse}
+                        </p>
+                    </div>
+                ) : (
+                    <p className="text-slate-500 italic text-center py-8">
+                        Žádné informace nejsou k dispozici.
+                    </p>
+                )}
+            </Modal>
+
             <main className="max-w-4xl mx-auto px-4 py-8">
                 {/* Hero Section */}
                 <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 mb-8">
@@ -387,7 +446,12 @@ export const RecipeDetailPage: React.FC<RecipeDetailPageProps> = ({ recipeId, on
                                     return (
                                         <li key={idx} className="flex justify-between items-center gap-2 pb-3 border-b border-slate-50 last:border-0 group">
                                             <div className="flex flex-col">
-                                                <span className="text-slate-700 font-medium">{ing.name}</span>
+                                                <span
+                                                    className="text-slate-700 font-medium cursor-pointer hover:text-emerald-600 transition-colors underline decoration-dotted decoration-slate-300"
+                                                    onClick={() => handleIngredientClick(ing.name)}
+                                                >
+                                                    {ing.name}
+                                                </span>
                                                 <span className="text-emerald-600 text-sm font-bold">
                                                     {ing.amount} {ing.unit}
                                                 </span>
