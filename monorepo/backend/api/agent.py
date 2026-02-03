@@ -11,59 +11,59 @@ router = APIRouter()
 @router.post("/chat", response_model=ChatResponse)
 @limiter.limit("20/minute")
 async def chat_with_agent(
-    request: ChatRequest,
-    req: Request,
+    chat_data: ChatRequest,
+    request: Request,
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)
 ):
     """
     Send a message to the AI culinary assistant.
     """
-    response_text = await ai_service.get_chat_completion(request.message)
+    response_text = await ai_service.get_chat_completion(chat_data.message)
     return ChatResponse(response=response_text)
 
 @router.post("/consult", response_model=ChatResponse)
 @limiter.limit("15/minute")
 async def consult_with_agent(
-    request: ConsultRequest,
-    req: Request,
+    consult_data: ConsultRequest,
+    request: Request,
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)
 ):
     """
     Start or continue a culinary consultation with the AI.
     """
-    messages = [m.model_dump() for m in request.messages]
+    messages = [m.model_dump() for m in consult_data.messages]
     response_text = await ai_service.get_consultation_completion(messages)
     return ChatResponse(response=response_text)
 
 @router.post("/generate-from-ingredients", response_model=ChatResponse)
 @limiter.limit("5/minute")
 async def generate_from_ingredients(
-    request: IngredientsRequest,
-    req: Request,
+    ing_data: IngredientsRequest,
+    request: Request,
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)
 ):
     """
     Generate a recipe based on a list of ingredients.
     """
-    response_text = await ai_service.generate_recipe_from_ingredients(request.ingredients)
+    response_text = await ai_service.generate_recipe_from_ingredients(ing_data.ingredients)
     return ChatResponse(response=response_text)
 
 @router.post("/analyze-video/{recipe_id}")
 @limiter.limit("3/minute")
 async def analyze_video_recipe(
     recipe_id: str,
-    request: ChatRequest,
-    req: Request,
+    chat_data: ChatRequest,
+    request: Request,
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)
 ):
     """
     Analyze a video and update an existing recipe with the details.
     """
-    success = await ai_service.analyze_video_and_update_recipe(recipe_id, request.message)
+    success = await ai_service.analyze_video_and_update_recipe(recipe_id, chat_data.message)
     if not success:
         return {"status": "error", "message": "Failed to update recipe from AI analysis"}
     return {"status": "success", "message": "Recipe updated successfully"}
@@ -71,7 +71,7 @@ async def analyze_video_recipe(
 @router.post("/analyze-fridge")
 @limiter.limit("3/minute")
 async def analyze_fridge(
-    req: Request,
+    request: Request,
     file: UploadFile = File(...),
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)
