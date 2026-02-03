@@ -3,12 +3,16 @@ from services.ai_service import AIService, get_ai_service
 from domain.agent import ChatRequest, ChatResponse, IngredientsRequest, ConsultRequest
 from api.deps import get_current_active_user
 from domain.user import UserInDB
+from core.ratelimit import limiter
+from fastapi import Request
 
 router = APIRouter()
 
 @router.post("/chat", response_model=ChatResponse)
+@limiter.limit("20/minute")
 async def chat_with_agent(
     request: ChatRequest,
+    req: Request,
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)
 ):
@@ -19,8 +23,10 @@ async def chat_with_agent(
     return ChatResponse(response=response_text)
 
 @router.post("/consult", response_model=ChatResponse)
+@limiter.limit("15/minute")
 async def consult_with_agent(
     request: ConsultRequest,
+    req: Request,
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)
 ):
@@ -32,8 +38,10 @@ async def consult_with_agent(
     return ChatResponse(response=response_text)
 
 @router.post("/generate-from-ingredients", response_model=ChatResponse)
+@limiter.limit("5/minute")
 async def generate_from_ingredients(
     request: IngredientsRequest,
+    req: Request,
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)
 ):
@@ -44,9 +52,11 @@ async def generate_from_ingredients(
     return ChatResponse(response=response_text)
 
 @router.post("/analyze-video/{recipe_id}")
+@limiter.limit("3/minute")
 async def analyze_video_recipe(
     recipe_id: str,
     request: ChatRequest,
+    req: Request,
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)
 ):
@@ -59,7 +69,9 @@ async def analyze_video_recipe(
     return {"status": "success", "message": "Recipe updated successfully"}
 
 @router.post("/analyze-fridge")
+@limiter.limit("3/minute")
 async def analyze_fridge(
+    req: Request,
     file: UploadFile = File(...),
     ai_service: AIService = Depends(get_ai_service),
     current_user: UserInDB = Depends(get_current_active_user)

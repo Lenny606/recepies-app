@@ -230,13 +230,25 @@ class AIService:
         if not settings.GEMINI_API_KEY:
             return "AI feature is not configured. Please add GEMINI_API_KEY to .env"
 
+        # Security: Limit total context size (approximate)
+        total_chars = sum(len(m.get("content", "")) for m in messages)
+        if total_chars > 20000:  # Roughly 5k-10k tokens
+            return "Kontext zprávy je příliš dlouhý. Prosím, začněte znovu."
+
         try:
+            # Enforce allowed roles for LLM safety
+            allowed_roles = {"user", "assistant"}
+            safe_messages = [
+                {"role": m["role"], "content": m["content"]}
+                for m in messages if m.get("role") in allowed_roles
+            ]
+
             full_messages = [
                 {
                     "role": "system",
                     "content": "Jsi kulinářský expert. Odpovídej stručně, věcně a bez zbytečných okolků. Soustřeď se na fakta, techniky a konkrétní rady. Pokud je to vhodné, používej odrážky. Komunikuj v češtině."
                 }
-            ] + messages
+            ] + safe_messages
 
             response = self.client.chat.completions.create(
                 model=self.model,

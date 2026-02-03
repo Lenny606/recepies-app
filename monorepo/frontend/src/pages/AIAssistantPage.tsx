@@ -68,7 +68,7 @@ export const AIAssistantPage: React.FC = () => {
 
                     <Button
                         onClick={() => navigate('/ai-consult')}
-                        className="w-full py-6 flex items-center justify-center gap-3 bg-white border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-lg shadow-lg shadow-emerald-100"
+                        className="w-full py-6 flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-lg shadow-lg shadow-emerald-200"
                     >
                         <Sparkles className="w-6 h-6" />
                         <span>Konzultovat s AI</span>
