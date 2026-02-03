@@ -66,6 +66,17 @@ export const AIAssistantPage: React.FC = () => {
                         </p>
                     </div>
 
+                    <Button
+                        onClick={() => navigate('/ai-consult')}
+                        className="w-full py-6 flex items-center justify-center gap-3 bg-white border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-lg shadow-lg shadow-emerald-100"
+                    >
+                        <Sparkles className="w-6 h-6" />
+                        <span>Konzultovat s AI</span>
+                    </Button>
+                    <p className="text-sm text-slate-400 mt-1 mb-4">
+                        Poraďte se o vaření, surovinách nebo technikách
+                    </p>
+
                     <Button onClick={() => navigate('/')} variant="outline" className="px-8 mt-4">
                         Zpět do kuchyně
                     </Button>
