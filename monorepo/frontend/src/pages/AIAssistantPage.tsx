@@ -31,11 +31,6 @@ export const AIAssistantPage: React.FC = () => {
                     AI Asistent
                 </h1>
 
-                <div className="flex items-center gap-2 text-xl text-slate-600 font-medium mb-8 bg-amber-50 px-6 py-3 rounded-full border border-amber-200">
-                    <Construction className="w-6 h-6 text-amber-500" />
-                    <span>Ve výstavbě</span>
-                </div>
-
                 <p className="text-slate-500 max-w-lg mx-auto text-lg leading-relaxed">
                     Náš tým kulinářských inženýrů právě pracuje na tomto chytrém pomocníkovi.
                     Brzy vám pomůže vymyslet, co uvařit ze zbytků v lednici!
