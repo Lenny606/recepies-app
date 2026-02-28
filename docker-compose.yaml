@@ -1,0 +1,47 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: infrastructure/backend.Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_DB_URL=mongodb://mongodb:27017
+      - DATABASE_NAME=recipe_app
+      - SECRET_KEY=temporary_secret_key_for_vibe_coding
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: infrastructure/frontend.Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
