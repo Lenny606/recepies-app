@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../components/ui/Button';
-import { ChevronLeft, Sparkles, Construction, Camera, Wand2 } from 'lucide-react';
+import { ChevronLeft, Sparkles, Camera, Wand2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const AIAssistantPage: React.FC = () => {
